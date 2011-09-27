@@ -423,6 +423,75 @@ module AmbigousItems
   end
 end
 
+class PublishOptions
+  include HappyMapper
+  
+  tag 'publishOptions'
+  
+  element :author, String, :tag => 'author'
+
+  element :draft, Boolean, :tag => 'draft'
+  element :scheduled_day, String, :tag => 'scheduledDay'
+  element :scheduled_time, String, :tag => 'scheduledTime'
+  element :published_day, String, :tag => 'publishDisplayDay'
+  element :published_time, String, :tag => 'publishDisplayTime'
+  element :created_day, String, :tag => 'publishDisplayDay'
+  element :created_time, String, :tag => 'publishDisplayTime'
+  
+end
+
+class Article
+  include HappyMapper
+  
+  tag 'Article'
+  namespace 'article'
+  
+  element :title, String
+  element :text, String
+  has_many :photos, 'Photo', :tag => 'Photo', :namespace => 'photo'
+  
+  element :publish_options, PublishOptions, :tag => 'publishOptions', :namespace => 'article'
+  
+end
+
+class PartiallyBadArticle
+  include HappyMapper
+  
+  tag 'Article'
+  namespace 'article'
+  
+  element :title, String
+  element :text, String
+  has_many :photos, 'Photo', :tag => 'Photo', :namespace => 'photo'
+  has_many :videos, 'Video', :tag => 'Video', :namespace => 'video'
+    
+  element :publish_options, PublishOptions, :tag => 'publishOptions', :namespace => 'article'
+  
+end
+
+class Photo
+  include HappyMapper
+
+  tag 'Photo'
+  namespace 'photo'
+
+  element :title, String
+  element :publish_options, PublishOptions, :tag => 'publishOptions', :namespace => 'photo'
+  
+end
+
+class Video
+  include HappyMapper
+
+  tag 'Video'
+  namespace 'video'
+
+  element :title, String
+  element :publish_options, PublishOptions, :tag => 'publishOptions', :namespace => 'video'
+  
+end
+
+
 describe HappyMapper do
 
   describe "being included into another class" do
@@ -793,4 +862,39 @@ describe HappyMapper do
                                        :xpath => '/ambigous/my-items')
     items.map(&:name).should == %w(first second third).map{|s| "My #{s} item" }
   end
+  
+    
+  context Article do
+    it "should parse the publish options for Article and Photo" do
+      @article.title.should_not be_nil
+      @article.text.should_not be_nil
+      @article.photos.should_not be_nil
+      @article.photos.first.title.should_not be_nil
+    end
+    
+    it "should parse the publish options for Article" do
+      @article.publish_options.should_not be_nil
+    end
+
+    it "should parse the publish options for Photo" do
+      @article.photos.first.publish_options.should_not be_nil
+    end
+    
+    before(:all) do
+      @article = Article.parse(fixture_file('subclass_namespace.xml'))
+    end
+  
+  end
+  
+  context "Namespace is missing because an optional element that uses it is not present" do
+    it "should parse successfully" do
+      @article = PartiallyBadArticle.parse(fixture_file('subclass_namespace.xml'))
+      @article.should_not be_nil
+      @article.title.should_not be_nil
+      @article.text.should_not be_nil
+      @article.photos.should_not be_nil
+      @article.photos.first.title.should_not be_nil
+    end
+  end
+  
 end

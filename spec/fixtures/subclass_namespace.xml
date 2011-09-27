@@ -1,0 +1,28 @@
+<article:Article xmlns:article="http://www.wetpaint.com/alfresco/article">
+  <article:title>article title</article:title>
+  <article:text>article text</article:text>
+  <article:publishOptions>
+    <article:author>Nathan</article:author>
+    <article:draft>false</article:draft>
+    <article:scheduledDay>2011-01-14</article:scheduledDay>
+    <article:scheduledTime>11:31:45.0</article:scheduledTime>
+    <article:publishDisplayDay>2011-01-14</article:publishDisplayDay>
+    <article:publishDisplayTime>11:31:45.0</article:publishDisplayTime>
+    <article:createdDay>2011-01-14</article:createdDay>
+    <article:createdTime>11:52:24.0</article:createdTime>
+  </article:publishOptions>
+  
+  <photo:Photo xmlns:photo="http://www.wetpaint.com/alfresco/photo">
+    <photo:title>photo title</photo:title>
+    <photo:publishOptions>
+      <photo:author>Stephanie</photo:author>
+      <photo:draft>false</photo:draft>
+      <photo:scheduledDay>2011-01-13</photo:scheduledDay>
+      <photo:scheduledTime>15:47:30.0</photo:scheduledTime>
+      <photo:publishDisplayDay>2011-01-13</photo:publishDisplayDay>
+      <photo:publishDisplayTime>15:47:30.0</photo:publishDisplayTime>
+      <photo:createdDay>2011-01-13</photo:createdDay>
+      <photo:createdTime>15:51:47.0</photo:createdTime>
+    </photo:publishOptions>
+  </photo:Photo>
+</article:Article>

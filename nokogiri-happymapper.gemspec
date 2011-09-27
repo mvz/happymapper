@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.description = %q{Object to XML Mapping Library, using Nokogiri (fork from John Nunemaker's Happymapper)}
   s.email = %q{damien@meliondesign.com}
   s.extra_rdoc_files = [
-    "README",
+    "README.md",
     "TODO"
   ]
   s.files = [
@@ -52,7 +52,6 @@ Gem::Specification.new do |s|
     "spec/happymapper_item_spec.rb",
     "spec/happymapper_spec.rb",
     "spec/happymapper_text_node_spec.rb",
-    "spec/spec.opts",
     "spec/spec_helper.rb"
   ]
 

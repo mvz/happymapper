@@ -3,7 +3,7 @@ require File.dirname(__FILE__) + '/spec_helper.rb'
 test_xml = %{
   <rss>
     <amazing:item xmlns:amazing="http://www.amazing.com/amazing" xmlns:different="http://www.different.com/different">
-      <amazing:title>Test XML</amazing:/title>
+      <amazing:title>Test XML</amazing:title>
       <different:link href="different_link" />
       <amazing:link href="link_to_resources" />
       <amazing:subitem>

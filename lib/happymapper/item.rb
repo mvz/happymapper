@@ -37,6 +37,7 @@ module HappyMapper
       # If the item is defined as a primitive type then cast the value to that type
       # else if the type is XMLContent then store the xml value
       # else the type, specified, needs to handle the parsing.
+      #
       
       if primitive?
         find(node, namespace, xpath_options) do |n|

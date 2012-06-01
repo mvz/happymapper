@@ -211,7 +211,7 @@ module HappyMapper
       namespace = @namespace
       
       # If the XML specified is an Node then we have what we need.
-      if xml.is_a?(Nokogiri::XML::Node)
+      if xml.is_a?(Nokogiri::XML::Node) && !xml.is_a?(Nokogiri::XML::Document)
         node = xml
       else
         
@@ -288,6 +288,9 @@ module HappyMapper
 
         nodes
       end
+
+      # Nothing matching found, we can go ahead and return
+      return ( ( options[:single] || root ) ? nil : [] ) if nodes.size == 0
 
       # If the :limit option has been specified then we are going to slice
       # our node results by that amount to allow us the ability to deal with

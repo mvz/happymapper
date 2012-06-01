@@ -601,7 +601,7 @@ describe HappyMapper do
       element = @klass.elements.first
       element.name.should == 'user'
       element.type.should == User
-      element.options[:single] = true
+      element.options[:single].should == true
     end
 
     it "should allow has many association" do
@@ -609,7 +609,7 @@ describe HappyMapper do
       element = @klass.elements.first
       element.name.should == 'users'
       element.type.should == User
-      element.options[:single] = false
+      element.options[:single].should == false
     end
 
     it "should default tag name to lowercase class" do
@@ -700,6 +700,12 @@ describe HappyMapper do
     address.country.code.should == 'de'
   end
 
+  it "should treat Nokogiri::XML::Document as root" do
+    doc = Nokogiri::XML(fixture_file('address.xml'))
+    address = Address.parse(doc)
+    address.class.should == Address
+  end
+
   it "should parse xml with default namespace (amazon)" do
     file_contents = fixture_file('pita.xml')
     items = PITA::Items.parse(file_contents, :single => true)
@@ -730,6 +736,17 @@ describe HappyMapper do
     feed = Atom::Feed.parse(fixture_file('atom.xml'))
     feed.link.first.href.should == 'http://www.example.com'
     feed.link.last.href.should == 'http://www.example.com/tv_shows.atom'
+  end
+
+  it "returns nil rather than empty array for absent values when :single => true" do
+    address = Address.parse('<?xml version="1.0" encoding="UTF-8"?><foo/>', :single => true)
+    address.should be_nil
+  end
+
+  it "should return same result for absent values when :single => true, regardless of :in_groups_of" do
+    addr1 = Address.parse('<?xml version="1.0" encoding="UTF-8"?><foo/>', :single => true)
+    addr2 = Address.parse('<?xml version="1.0" encoding="UTF-8"?><foo/>', :single => true, :in_groups_of => 10)
+    addr1.should == addr2
   end
 
   it "should parse xml with nested elements" do

@@ -124,7 +124,7 @@ module HappyMapper
     #     the object will be converted upon parsing
     # @param [Hash] options additional parameters to send to the relationship
     #
-    def content(name, type, options={})
+    def content(name, type=String, options={})
       @content = TextNode.new(name, type, options)
       attr_accessor @content.method_name.intern
     end

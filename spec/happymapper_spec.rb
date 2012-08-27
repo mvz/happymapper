@@ -535,8 +535,21 @@ class OptionalAttribute
   tag 'address'
   
   attribute :street, String
-end
+end  
 
+class DefaultNamespaceCombi
+  include HappyMapper
+
+
+  register_namespace 'bk', "urn:loc.gov:books"
+  register_namespace 'isbn', "urn:ISBN:0-395-36341-6"
+  namespace 'bk'
+
+  tag 'book'
+
+  element :title, String, :namespace => 'bk', :tag => "title"
+  element :number, String, :namespace => 'isbn', :tag => "number"
+end
 
 describe HappyMapper do
 
@@ -924,6 +937,22 @@ describe HappyMapper do
       a[2].street.should be_nil
     end
     
+  end
+  
+  describe "Default namespace combi" do
+    before(:each) do
+      file_contents = fixture_file('default_namespace_combi.xml')
+      @book = DefaultNamespaceCombi.parse(file_contents, :single => true)
+    end
+
+    it "should parse title" do
+      @book.title.should == "Cheaper by the Dozen"
+    end
+
+    it "should parse number" do
+      @book.number.should == "1568491379"
+    end
+
   end
 
   describe 'Xml Content' do

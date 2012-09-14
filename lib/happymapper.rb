@@ -121,10 +121,10 @@ module HappyMapper
     # 
     # @param [Symbol] name the name of the accessor that is created
     # @param [String,Class] type the class name of the name of the class whcih
-    #     the object will be converted upon parsing
+    #     the object will be converted upon parsing. By Default String class will be taken.
     # @param [Hash] options additional parameters to send to the relationship
     #
-    def content(name, type, options={})
+    def content(name, type=String, options={})
       @content = TextNode.new(name, type, options)
       attr_accessor @content.method_name.intern
     end

@@ -119,6 +119,10 @@ class Product
   has_one :address, Address
 end
 
+class Rate
+  include HappyMapper	
+end
+
 module FamilySearch
   class AlternateIds
     include HappyMapper
@@ -307,6 +311,11 @@ class Country
   content :name, String
 end
 
+
+class State
+  include HappyMapper  
+end
+
 class Address
   include HappyMapper
 
@@ -316,6 +325,7 @@ class Address
   element :housenumber, String
   element :city, String
   has_one :country, Country
+  has_one :state, State
 end
 
 # for type coercion
@@ -663,6 +673,23 @@ describe HappyMapper do
     end
   end
 
+  describe "#content" do 
+     it "should take String as default argument for type" do     	     
+       State.content :name
+       address = Address.parse(fixture_file('address.xml'))
+       address.state.name.should == "Lower Saxony"
+       address.state.name.class == String
+     end
+     
+     it "should work when specific type is provided" do     	     
+       Rate.content :value, Float
+       Product.has_one :rate, Rate
+       product = Product.parse(fixture_file('product_default_namespace.xml'), :single => true)
+       product.rate.value.should == 120.25
+       product.rate.class == Float
+     end 
+  end
+  
   it "should parse xml attributes into ruby objects" do
     posts = Post.parse(fixture_file('posts.xml'))
     posts.size.should == 20

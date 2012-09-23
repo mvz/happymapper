@@ -309,8 +309,12 @@ module HappyMapper
       
       nodes.each_slice(limit) do |slice|
         
-        part = slice.map do |n|
-          obj = new
+        part = slice.map do |n|  
+          
+          # If an existing HappyMapper object is provided, update it with the
+          # values from the xml being parsed.  Otherwise, create a new object
+          
+          obj = options[:update] ? options[:update] : new
 
           attributes.each do |attr|
             obj.send("#{attr.method_name}=",attr.from_xml_node(n, namespace, namespaces))
@@ -612,7 +616,15 @@ module HappyMapper
     write_out_to_xml ? builder.to_xml : builder
     
   end
-  
+     
+  # Parse the xml and update this instance. This does not update instances
+  # of HappyMappers that are children of this object.  New instances will be
+  # created for any HappyMapper children of this object.       
+  #  
+  # Params and return are the same as the class parse() method above.
+  def parse(xml, options = {})
+    self.class.parse(xml, options.merge!(:update => self))
+  end
   
 end
 

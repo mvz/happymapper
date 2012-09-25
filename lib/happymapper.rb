@@ -389,13 +389,17 @@ module HappyMapper
   #     is being used when called recursively.
   # @param [String] default_namespace the name of the namespace which is the
   #     default for the xml being produced; this is specified by the element
-  #     declaration when calling #to_xml recursively.
+  #     declaration when calling #to_xml recursively. 
+  # @param [String] tag_from_parent the xml tag to use on the element when being
+  #     called recursively.  This lets the parent doc define its own structure.
+  #     Otherwise the element uses the tag it has defined for itself.  Should only
+  #     apply when calling a child HappyMapper element.
   #
   # @return [String,Nokogiri::XML::Builder] return XML representation of the
   #      HappyMapper object; when called recursively this is going to return
   #      and Nokogiri::XML::Builder object.
   #
-  def to_xml(builder = nil,default_namespace = nil)
+  def to_xml(builder = nil,default_namespace = nil,tag_from_parent = nil)
     
     #
     # If to_xml has been called without a passed in builder instance that
@@ -454,12 +458,13 @@ module HappyMapper
     end.flatten
     
     attributes = Hash[ *attributes ]
-
+                      
     #
-    # Create a tag in the builder that matches the class's tag name and append
+    # Create a tag in the builder that matches the class's tag name unless a tag was passed
+    # in a recursive call from the parent doc.  Then append
     # any attributes to the element that were defined above.
     #
-    builder.send("#{self.class.tag_name}_",attributes) do |xml|
+    builder.send("#{tag_from_parent || self.class.tag_name}_",attributes) do |xml|
       
       #
       # Add all the registered namespaces to the root element.
@@ -575,7 +580,7 @@ module HappyMapper
               # process should have their contents retrieved and attached
               # to the builder structure
               #
-              item.to_xml(xml,element.options[:namespace])
+              item.to_xml(xml,element.options[:namespace],element.options[:tag] || nil)
 
             elsif item
             

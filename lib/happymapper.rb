@@ -13,6 +13,7 @@ module HappyMapper
     base.instance_variable_set("@attributes", {})
     base.instance_variable_set("@elements", {})
     base.instance_variable_set("@registered_namespaces", {})
+    base.instance_variable_set("@wrapper_anonymous_classes", {})
 
     base.extend ClassMethods
   end
@@ -195,6 +196,38 @@ module HappyMapper
     #
     def tag_name
       @tag_name ||= to_s.split('::')[-1].downcase
+    end
+    
+    # There is an XML tag that needs to be known for parsing and should be generated
+    # during a to_xml.  But it doesn't need to be a class and the contained elements should
+    # be made available on the parent class
+    #
+    # @param [String] name the name of the element that is just a place holder
+    # @param [Proc] blk the element definitions inside the place holder tag
+    #
+    def wrap(name, &blk)      
+      # Get an anonymous HappyMapper that has 'name' as its tag and defined
+      # in '&blk'.  Then save that to a class instance variable for later use
+      wrapper = AnonymousWrapperClassFactory.get(name, &blk)
+      @wrapper_anonymous_classes[wrapper.inspect] = wrapper
+
+      # Create getter/setter for each element and attribute defined on the anonymous HappyMapper
+      # onto this class. They get/set the value by passing thru to the anonymous class.
+      passthrus = wrapper.attributes + wrapper.elements  
+      passthrus.each do |item|   
+        class_eval %{
+          def #{item.method_name}
+            @#{name} ||= self.class.instance_variable_get('@wrapper_anonymous_classes')['#{wrapper.inspect}'].new
+            @#{name}.#{item.method_name}
+          end
+          def #{item.method_name}=(value)
+            @#{name} ||= self.class.instance_variable_get('@wrapper_anonymous_classes')['#{wrapper.inspect}'].new
+            @#{name}.#{item.method_name} = value
+          end
+        }     
+      end     
+
+      has_one name, wrapper
     end
 
     #
@@ -624,6 +657,19 @@ module HappyMapper
   # Params and return are the same as the class parse() method above.
   def parse(xml, options = {})
     self.class.parse(xml, options.merge!(:update => self))
+  end   
+  
+  private
+  
+  # Factory for creating anonmyous HappyMappers
+  class AnonymousWrapperClassFactory
+   def self.get(name, &blk)
+     Class.new do
+       include HappyMapper
+       tag name
+       instance_eval &blk
+     end 
+   end
   end
   
 end

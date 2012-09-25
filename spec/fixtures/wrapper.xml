@@ -1,0 +1,11 @@
+<root attr1="somevalue">
+	<name>myname</name>
+	<mywraptag>
+		<description>some description</description>
+		<subclass myattr='attrvalue'>
+			<item>item1</item>
+			<item>item2</item>
+		</subclass>
+	</mywraptag>
+	<number>12345</number>     
+</root>

@@ -53,6 +53,8 @@ module ToXML
     # Class composition
     #
     element :country, 'Country', :tag => 'country'
+    
+    attribute :occupied, Boolean
 
     def initialize(parameters)
       parameters.each_pair do |property,value|
@@ -110,7 +112,8 @@ module ToXML
         'city' => 'Seattle',
         'country' => Country.new(:name => 'USA', :code => 'us', :empty_code => nil, 
           :description => Country::Description.new("A lovely country") ),
-        'date_created' => '2011-01-01 15:00:00')
+        'date_created' => '2011-01-01 15:00:00',
+        'occupied' => false)
         
         
         address.dates_updated = ["2011-01-01 16:01:00","2011-01-02 11:30:01"]
@@ -142,6 +145,10 @@ module ToXML
       
       it "should not save attributes marked as read_only" do
         @address_xml.xpath("@modified").should be_empty
+      end
+      
+      it 'should save attributes that are Boolean and have a value of false' do
+        @address_xml.xpath('@occupied').text.should == "false"
       end
       
       context "state_when_nil option" do

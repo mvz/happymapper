@@ -1063,4 +1063,43 @@ describe HappyMapper do
      end
    end
   
+  context "when letting user set Nokogiri::XML::ParseOptions" do
+    let(:default) {
+      Class.new do
+        include HappyMapper
+        element :item, String
+      end
+    }
+    let(:custom) {
+      Class.new do
+        include HappyMapper
+        element :item, String
+        on_config do |config|
+          config.default_xml
+        end
+      end     
+    }
+    
+    it 'initializes @config_callback to nil' do
+      default.config_callback.should be_nil
+    end
+    
+    it 'defaults to Nokogiri::XML::ParseOptions::STRICT' do
+     expect { default.parse(fixture_file('set_config_options.xml')) }.to raise_error(Nokogiri::XML::SyntaxError)
+    end
+    
+    it 'accepts .on_config callback' do
+      custom.config_callback.should_not be_nil
+    end
+    
+    it 'parses according to @config_callback' do
+      expect { custom.parse(fixture_file('set_config_options.xml')) }.to_not raise_error(Nokogiri::XML::SyntaxError)
+    end
+    
+    it 'can clear @config_callback' do
+      custom.on_config {}
+      expect { custom.parse(fixture_file('set_config_options.xml')) }.to raise_error(Nokogiri::XML::SyntaxError)
+    end    
+  end
+  
 end

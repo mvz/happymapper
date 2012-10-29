@@ -231,6 +231,23 @@ module HappyMapper
 
       has_one name, wrapper
     end
+    
+    # The callback defined through {.on_config}.
+    # 
+    # @return [Proc] the proc to pass to Nokogiri to setup parse options. nil if empty.
+    #
+    def config_callback
+      @config_callback
+    end
+    
+    # Register a config callback according to the block Nokogori expects when calling Nokogiri::XML::Document.parse().
+    # See http://nokogiri.org/Nokogiri/XML/Document.html#method-c-parse
+    #
+    # @param [Proc] the proc to pass to Nokogiri to setup parse options
+    #
+    def on_config(&blk)
+      @config_callback = blk
+    end
 
     #
     # @param [Nokogiri::XML::Node,Nokogiri:XML::Document,String] xml the XML 
@@ -258,7 +275,7 @@ module HappyMapper
           # Attempt to parse the xml value with Nokogiri XML as a document
           # and select the root element
           
-          xml = Nokogiri::XML(xml, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
+          xml = Nokogiri::XML(xml, nil, nil, Nokogiri::XML::ParseOptions::STRICT, &config_callback)
           node = xml.root
         end
 

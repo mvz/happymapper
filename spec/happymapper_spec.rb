@@ -282,6 +282,8 @@ end
 class Status
   include HappyMapper
 
+  register_namespace 'fake', "faka:namespace"
+
   element :id, Integer
   element :text, String
   element :created_at, Time
@@ -553,12 +555,14 @@ class DefaultNamespaceCombi
 
   register_namespace 'bk', "urn:loc.gov:books"
   register_namespace 'isbn', "urn:ISBN:0-395-36341-6"
+  register_namespace 'p', "urn:loc.gov:people"
   namespace 'bk'
 
   tag 'book'
 
   element :title, String, :namespace => 'bk', :tag => "title"
   element :number, String, :namespace => 'isbn', :tag => "number"
+  element :author, String, :namespace => 'p', :tag => "author"
 end
 
 describe HappyMapper do
@@ -970,6 +974,10 @@ describe HappyMapper do
     before(:each) do
       file_contents = fixture_file('default_namespace_combi.xml')
       @book = DefaultNamespaceCombi.parse(file_contents, :single => true)
+    end
+
+    it "should parse author" do
+      @book.author.should == "Frank Gilbreth"
     end
 
     it "should parse title" do

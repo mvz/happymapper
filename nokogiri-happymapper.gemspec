@@ -48,6 +48,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.4.1}
   s.summary = %q{Provides a simple way to map XML to Ruby Objects and back again.}
+  s.license = "MIT"
   s.test_files = `git ls-files -- spec/*`.split("\n")
 
 

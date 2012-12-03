@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/lib/happymapper'
+require File.dirname(__FILE__) + '/lib/version'
 
 module HappyMapper
   def self.show_version_changes(version)

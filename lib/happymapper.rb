@@ -303,9 +303,7 @@ module HappyMapper
         namespace = options[:namespace]
       elsif namespaces.has_key?("xmlns")
         namespace ||= DEFAULT_NS
-        default_namespace = namespaces.delete("xmlns")
-        namespaces[namespace] ||= default_namespace
-        namespaces["xmlns:#{namespaces.key(default_namespace)}"] = default_namespace
+        namespaces[DEFAULT_NS] = namespaces.delete("xmlns")
       elsif namespaces.has_key?(DEFAULT_NS)
         namespace ||= DEFAULT_NS
       end

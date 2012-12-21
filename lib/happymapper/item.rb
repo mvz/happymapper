@@ -26,19 +26,19 @@ module HappyMapper
     def constant
       @constant ||= constantize(type)
     end
-      
+
     #
     # @param [XMLNode] node the xml node that is being parsed
     # @param [String] namespace the name of the namespace
     # @param [Hash] xpath_options additional xpath options
-    #  
+    #
     def from_xml_node(node, namespace, xpath_options)
-      
+
       # If the item is defined as a primitive type then cast the value to that type
       # else if the type is XMLContent then store the xml value
       # else the type, specified, needs to handle the parsing.
       #
-      
+
       if primitive?
         find(node, namespace, xpath_options) do |n|
           if n.respond_to?(:content)
@@ -53,11 +53,11 @@ module HappyMapper
           n.respond_to?(:to_xml) ? n.to_xml : n.to_s
         end
       else
-        
+
         # When not a primitive type or XMLContent then default to using the
-        # class method #parse of the type class. If the option 'parser' has been 
+        # class method #parse of the type class. If the option 'parser' has been
         # defined then call that method on the type class instead of #parse
-        
+
         if options[:parser]
           find(node, namespace, xpath_options) do |n|
             if n.respond_to?(:content) && !options[:raw]
@@ -86,7 +86,7 @@ module HappyMapper
       #puts "xpath: #{xpath}"
       xpath
     end
-    
+
     # @return [Boolean] true if the type defined for the item is defined in the
     #     list of primite types {Types}.
     def primitive?
@@ -113,16 +113,16 @@ module HappyMapper
     # When the type of the item is a primitive type, this will convert value specifed
     # to the particular primitive type. If it fails during this process it will
     # return the original String value.
-    # 
+    #
     # @param [String] value the string value parsed from the XML value that will
     #     be converted to the particular primitive type.
-    # 
+    #
     # @return [String,Float,Time,Date,DateTime,Boolean,Integer] the converted value
     #     to the new type.
     #
     def typecast(value)
       return value if value.kind_of?(constant) || value.nil?
-      begin        
+      begin
         if    constant == String    then value.to_s
         elsif constant == Float     then value.to_f
         elsif constant == Time      then Time.parse(value.to_s) rescue Time.at(value.to_i)
@@ -155,7 +155,7 @@ module HappyMapper
       #
       # Convert any String defined types into their constant version so that
       # the method #parse or the custom defined parser method would be used.
-      # 
+      #
       # @param [String,Constant] type is the name of the class or the constant
       #     for the class.
       # @return [Constant] the constant of the type
@@ -180,18 +180,18 @@ module HappyMapper
 
 
       def find(node, namespace, xpath_options, &block)
-        if self.namespace && xpath_options["xmlns:#{self.namespace}"]
+        if self.namespace
           # from the class definition
           namespace = self.namespace
-        elsif options[:namespace] && xpath_options["xmlns:#{options[:namespace]}"]
+        elsif options[:namespace]
           namespace = options[:namespace]
         end
-        
+
         if element?
           if options[:single]
-            
+
             result = nil
-            
+
             if options[:xpath]
               result = node.xpath(options[:xpath], xpath_options)
             else
@@ -205,9 +205,9 @@ module HappyMapper
               value
             end
           else
-            
+
             target_path = options[:xpath] ? options[:xpath] : xpath(namespace)
-            
+
             results = node.xpath(target_path, xpath_options).collect do |result|
               value = yield(result)
               handle_attributes_option(result, value, xpath_options)
@@ -216,13 +216,13 @@ module HappyMapper
             results
           end
         elsif attribute?
-          
+
           if options[:xpath]
             yield(node.xpath(options[:xpath],xpath_options))
           else
             yield(node[tag])
           end
-          
+
         else # text node
           yield(node.children.detect{|c| c.text?})
         end

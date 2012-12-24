@@ -10,8 +10,8 @@ module HappyMapper
   DEFAULT_NS = "happymapper"
 
   def self.included(base)
-    base.instance_variable_set("@attributes", {})
-    base.instance_variable_set("@elements", {})
+    base.instance_variable_set("@attributes", [])
+    base.instance_variable_set("@elements", [])
     base.instance_variable_set("@registered_namespaces", {})
     base.instance_variable_set("@wrapper_anonymous_classes", {})
 
@@ -37,8 +37,7 @@ module HappyMapper
     #
     def attribute(name, type, options={})
       attribute = Attribute.new(name, type, options)
-      @attributes[to_s] ||= []
-      @attributes[to_s] << attribute
+      @attributes << attribute
       attr_accessor attribute.method_name.intern
     end
 
@@ -49,7 +48,7 @@ module HappyMapper
     #     an empty array is returned when there have been no attributes defined.
     #
     def attributes
-      @attributes[to_s] || []
+      @attributes
     end
 
     #
@@ -93,8 +92,7 @@ module HappyMapper
     #
     def element(name, type, options={})
       element = Element.new(name, type, options)
-      @elements[to_s] ||= []
-      @elements[to_s] << element
+      @elements << element
       attr_accessor element.method_name.intern
     end
 
@@ -106,7 +104,7 @@ module HappyMapper
     #     defined.
     #
     def elements
-      @elements[to_s] || []
+      @elements
     end
 
     #

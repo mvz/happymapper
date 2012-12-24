@@ -17,5 +17,10 @@ describe HappyMapper::Attribute do
     it 'should know that it is NOT a text node' do
       @attr.text_node?.should be_false
     end
+
+    it 'should accept :default as an option' do
+      attr = described_class.new(:foo, String, :default => 'foobar')
+      attr.default.should == 'foobar'
+    end
   end
 end

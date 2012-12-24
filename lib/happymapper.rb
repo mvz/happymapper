@@ -10,10 +10,18 @@ module HappyMapper
   DEFAULT_NS = "happymapper"
 
   def self.included(base)
-    base.instance_variable_set("@attributes", {})
-    base.instance_variable_set("@elements", {})
-    base.instance_variable_set("@registered_namespaces", {})
-    base.instance_variable_set("@wrapper_anonymous_classes", {})
+    superclass = base.superclass
+    if !(superclass <= HappyMapper)
+      base.instance_variable_set("@attributes", [])
+      base.instance_variable_set("@elements", [])
+      base.instance_variable_set("@registered_namespaces", {})
+      base.instance_variable_set("@wrapper_anonymous_classes", {})
+    else
+      base.instance_variable_set("@attributes", superclass.attributes.dup)
+      base.instance_variable_set("@elements", superclass.elements.dup)
+      base.instance_variable_set("@registered_namespaces", superclass.instance_variable_get(:@registered_namespaces).dup)
+      base.instance_variable_set("@wrapper_anonymous_classes", superclass.instance_variable_get(:@wrapper_anonymous_classes).dup)
+    end
 
     base.extend ClassMethods
   end
@@ -37,8 +45,7 @@ module HappyMapper
     #
     def attribute(name, type, options={})
       attribute = Attribute.new(name, type, options)
-      @attributes[to_s] ||= []
-      @attributes[to_s] << attribute
+      @attributes << attribute
       attr_accessor attribute.method_name.intern
     end
 
@@ -49,7 +56,7 @@ module HappyMapper
     #     an empty array is returned when there have been no attributes defined.
     #
     def attributes
-      @attributes[to_s] || []
+      @attributes
     end
 
     #
@@ -93,8 +100,7 @@ module HappyMapper
     #
     def element(name, type, options={})
       element = Element.new(name, type, options)
-      @elements[to_s] ||= []
-      @elements[to_s] << element
+      @elements << element
       attr_accessor element.method_name.intern
     end
 
@@ -106,7 +112,7 @@ module HappyMapper
     #     defined.
     #
     def elements
-      @elements[to_s] || []
+      @elements
     end
 
     #
@@ -370,7 +376,9 @@ module HappyMapper
           obj = options[:update] ? options[:update] : new
 
           attributes.each do |attr|
-            obj.send("#{attr.method_name}=",attr.from_xml_node(n, namespace, namespaces))
+            value = attr.from_xml_node(n, namespace, namespaces)
+            value = attr.default if value.nil?
+            obj.send("#{attr.method_name}=", value)
           end
 
           elements.each do |elem|
@@ -429,7 +437,14 @@ module HappyMapper
         collection
       end
     end
+  end
 
+  # Set all attributes with a default to their default values
+  def initialize
+    super
+    self.class.attributes.reject {|attr| attr.default.nil?}.each do |attr|
+      send("#{attr.method_name}=", attr.default)
+    end
   end
 
   #
@@ -479,6 +494,7 @@ module HappyMapper
       unless attribute.options[:read_only]
 
         value = send(attribute.method_name)
+        value = nil if value == attribute.default
 
         #
         # If the attribute defines an on_save lambda/proc or value that maps to

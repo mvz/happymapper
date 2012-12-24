@@ -97,7 +97,10 @@ module HappyMapper
       @method_name ||= name.tr('-', '_')
     end
 
-    #
+    def self.typecasts
+      @typecasts ||= Hash.new {|hash, key| hash[key] = {}}
+    end
+
     # When the type of the item is a primitive type, this will convert value specifed
     # to the particular primitive type. If it fails during this process it will
     # return the original String value.
@@ -110,7 +113,7 @@ module HappyMapper
     #
     def typecast(value)
       return value if value.kind_of?(constant) || value.nil?
-      begin        
+      self.class.typecasts[constant][value] ||= begin
         if    constant == String    then value.to_s
         elsif constant == Float     then value.to_f
         elsif constant == Time      then Time.parse(value.to_s) rescue Time.at(value.to_i)

@@ -10,10 +10,18 @@ module HappyMapper
   DEFAULT_NS = "happymapper"
 
   def self.included(base)
-    base.instance_variable_set("@attributes", [])
-    base.instance_variable_set("@elements", [])
-    base.instance_variable_set("@registered_namespaces", {})
-    base.instance_variable_set("@wrapper_anonymous_classes", {})
+    superclass = base.superclass
+    if !(superclass <= HappyMapper)
+      base.instance_variable_set("@attributes", [])
+      base.instance_variable_set("@elements", [])
+      base.instance_variable_set("@registered_namespaces", {})
+      base.instance_variable_set("@wrapper_anonymous_classes", {})
+    else
+      base.instance_variable_set("@attributes", superclass.attributes.dup)
+      base.instance_variable_set("@elements", superclass.elements.dup)
+      base.instance_variable_set("@registered_namespaces", superclass.instance_variable_get(:@registered_namespaces).dup)
+      base.instance_variable_set("@wrapper_anonymous_classes", superclass.instance_variable_get(:@wrapper_anonymous_classes).dup)
+    end
 
     base.extend ClassMethods
   end

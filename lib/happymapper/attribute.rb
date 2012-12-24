@@ -9,5 +9,13 @@ module HappyMapper
       super
       self.default = o[:default]
     end
+
+    def find(node, namespace, xpath_options)
+      if options[:xpath]
+        yield(node.xpath(options[:xpath],xpath_options))
+      else
+        yield(node[tag])
+      end
+    end
   end
 end

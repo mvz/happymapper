@@ -93,18 +93,6 @@ module HappyMapper
       Types.include?(constant)
     end
 
-    def element?
-      @xml_type == 'element'
-    end
-
-    def attribute?
-      @xml_type == 'attribute'
-    end
-
-    def text_node?
-      @xml_type == 'textnode'
-    end
-
     def method_name
       @method_name ||= name.tr('-', '_')
     end
@@ -177,75 +165,6 @@ module HappyMapper
           type
         end
       end
-
-
-      def find(node, namespace, xpath_options, &block)
-        if self.namespace && xpath_options["xmlns:#{self.namespace}"]
-          # from the class definition
-          namespace = self.namespace
-        elsif options[:namespace] && xpath_options["xmlns:#{options[:namespace]}"]
-          namespace = options[:namespace]
-        end
-        
-        if element?
-          if options[:single]
-            
-            result = nil
-            
-            if options[:xpath]
-              result = node.xpath(options[:xpath], xpath_options)
-            else
-              result = node.xpath(xpath(namespace), xpath_options)
-            end
-
-            if result
-              value = options[:single] ? yield(result.first) : result.map {|r| yield r }
-              handle_attributes_option(result, value, xpath_options)
-
-              value
-            end
-          else
-            
-            target_path = options[:xpath] ? options[:xpath] : xpath(namespace)
-            
-            results = node.xpath(target_path, xpath_options).collect do |result|
-              value = yield(result)
-              handle_attributes_option(result, value, xpath_options)
-              value
-            end
-            results
-          end
-        elsif attribute?
-          
-          if options[:xpath]
-            yield(node.xpath(options[:xpath],xpath_options))
-          else
-            yield(node[tag])
-          end
-          
-        else # text node
-          yield(node.children.detect{|c| c.text?})
-        end
-      end
-
-      def handle_attributes_option(result, value, xpath_options)
-        if options[:attributes].is_a?(Hash)
-          result = result.first unless result.respond_to?(:attribute_nodes)
-
-          result.attribute_nodes.each do |xml_attribute|
-            if attribute_options = options[:attributes][xml_attribute.name.to_sym]
-              attribute_value = Attribute.new(xml_attribute.name.to_sym, *attribute_options).from_xml_node(result, namespace, xpath_options)
-
-              result.instance_eval <<-EOV
-                def value.#{xml_attribute.name}
-                  #{attribute_value.inspect}
-                end
-              EOV
-            end # if attributes_options
-          end # attribute_nodes.each
-        end # if options[:attributes]
-      end # def handle...
-
     # end private methods
   end
 end

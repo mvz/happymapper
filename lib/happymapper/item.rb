@@ -116,7 +116,7 @@ module HappyMapper
         elsif constant == Time      then Time.parse(value.to_s) rescue Time.at(value.to_i)
         elsif constant == Date      then Date.parse(value.to_s)
         elsif constant == DateTime  then DateTime.parse(value.to_s)
-        elsif constant == Boolean   then ['true', 't', '1'].include?(value.to_s.downcase)
+        elsif constant == Boolean   then ['true', 't', '1', 'yes', 'y'].include?(value.to_s.downcase)
         elsif constant == Integer
           # ganked from datamapper
           value_to_i = value.to_i

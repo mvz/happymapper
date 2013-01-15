@@ -110,6 +110,9 @@ describe HappyMapper::Item do
     it "should work with Boolean" do
       item = HappyMapper::Item.new(:foo, Boolean)
       item.typecast('false').should == false
+      ['true', 't', '1', 'yes', 'y'].each do |a|
+        item.typecast(a).should == true
+      end
     end
   end
 end

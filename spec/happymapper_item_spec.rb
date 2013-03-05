@@ -33,18 +33,18 @@ describe HappyMapper::Item do
       item = HappyMapper::Item.new(:foo, String)
       item.constant.should == String
     end
-    
+
     it "should convert string type to constant" do
       item = HappyMapper::Item.new(:foo, 'String')
       item.constant.should == String
     end
-    
+
     it "should convert string with :: to constant" do
       item = HappyMapper::Item.new(:foo, 'Foo::Bar')
       item.constant.should == Foo::Bar
     end
   end
-  
+
   describe "#method_name" do
     it "should convert dashes to underscores" do
       item = HappyMapper::Item.new(:'foo-bar', String, :tag => 'foobar')
@@ -108,7 +108,7 @@ describe HappyMapper::Item do
     end
 
     it "should work with Boolean" do
-      item = HappyMapper::Item.new(:foo, Boolean)
+      item = HappyMapper::Item.new(:foo, HappyMapper::Boolean)
       item.typecast('false').should == false
     end
   end

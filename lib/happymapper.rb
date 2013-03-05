@@ -2,10 +2,9 @@ require 'nokogiri'
 require 'date'
 require 'time'
 
-class Boolean; end
-class XmlContent; end
-
 module HappyMapper
+  class Boolean; end
+  class XmlContent; end
 
   DEFAULT_NS = "happymapper"
 
@@ -21,9 +20,9 @@ module HappyMapper
       base.instance_eval do
         @attributes = superclass.attributes.dup
         @elements = superclass.elements.dup
-        @registered_namespaces = 
+        @registered_namespaces =
             superclass.instance_variable_get(:@registered_namespaces).dup
-        @wrapper_anonymous_classes = 
+        @wrapper_anonymous_classes =
             superclass.instance_variable_get(:@wrapper_anonymous_classes).dup
       end
     end

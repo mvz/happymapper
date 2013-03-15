@@ -2,10 +2,10 @@ module HappyMapper
   class Element < Item
 
     def find(node, namespace, xpath_options)
-      if self.namespace && xpath_options["xmlns:#{self.namespace}"]
+      if self.namespace
         # from the class definition
         namespace = self.namespace
-      elsif options[:namespace] && xpath_options["xmlns:#{options[:namespace]}"]
+      elsif options[:namespace]
         namespace = options[:namespace]
       end
 

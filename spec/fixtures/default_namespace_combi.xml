@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<bk:book xmlns="urn:ISBN:0-395-36341-6" xmlns:bk="urn:loc.gov:books">
+<bk:book xmlns:bk="urn:loc.gov:books" xmlns:p="urn:loc.gov:people" xmlns="urn:ISBN:0-395-36341-6">
+    <p:author>Frank Gilbreth</p:author>
     <bk:title>Cheaper by the Dozen</bk:title>
     <number>1568491379</number>
 </bk:book>

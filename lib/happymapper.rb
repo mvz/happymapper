@@ -717,7 +717,8 @@ module HappyMapper
 
 end
 
-require File.dirname(__FILE__) + '/happymapper/item'
-require File.dirname(__FILE__) + '/happymapper/attribute'
-require File.dirname(__FILE__) + '/happymapper/element'
-require File.dirname(__FILE__) + '/happymapper/text_node'
+require 'happymapper/supported_types'
+require 'happymapper/item'
+require 'happymapper/attribute'
+require 'happymapper/element'
+require 'happymapper/text_node'

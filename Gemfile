@@ -4,7 +4,6 @@ gemspec
 
 group :development do
   gem "rake", "0.9.2"
-  gem "rspec", "2.8"
-  gem "guard"
   gem "guard-rspec"
+  gem 'rb-fsevent', '~> 0.9'
 end

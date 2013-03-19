@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/spec_helper.rb'
+require 'spec_helper'
 
 module Foo
   class Bar; end
@@ -110,6 +110,12 @@ describe HappyMapper::Item do
     it "should work with Boolean" do
       item = HappyMapper::Item.new(:foo, HappyMapper::Boolean)
       item.typecast('false').should == false
+      ['true', 't', '1', 'yes', 'y'].each do |a|
+        item.typecast(a).should == true
+      end
+      ['false', 'f', '0', 'no', 'n'].each do |a|
+        item.typecast(a).should == false
+      end
     end
   end
 end

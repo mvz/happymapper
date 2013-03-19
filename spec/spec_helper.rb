@@ -1,6 +1,6 @@
 require 'rspec'
 
-require File.join(File.dirname(__FILE__), '..', 'lib', 'happymapper')
+require 'happymapper'
 
 def fixture_file(filename)
   File.read(File.dirname(__FILE__) + "/fixtures/#{filename}")

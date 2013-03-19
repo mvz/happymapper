@@ -2,8 +2,6 @@ module HappyMapper
   class Item
     attr_accessor :name, :type, :tag, :options, :namespace
 
-    Types = [String, Float, Time, Date, DateTime, Integer, Boolean]
-
     # options:
     #   :deep   =>  Boolean False to only parse element's children, True to include
     #               grandchildren and all others down the chain (// in xpath)
@@ -34,48 +32,16 @@ module HappyMapper
     #
     def from_xml_node(node, namespace, xpath_options)
 
-      # If the item is defined as a primitive type then cast the value to that type
-      # else if the type is XMLContent then store the xml value
-      # else the type, specified, needs to handle the parsing.
-      #
-
-      if primitive?
-        find(node, namespace, xpath_options) do |n|
-          if n.respond_to?(:content)
-            typecast(n.content)
-          else
-            typecast(n)
-          end
-        end
+      if suported_type_registered?
+        find(node, namespace, xpath_options) { |n| process_node_as_supported_type(n) }
       elsif constant == XmlContent
-        find(node, namespace, xpath_options) do |n|
-          n = n.children if n.respond_to?(:children)
-          n.respond_to?(:to_xml) ? n.to_xml : n.to_s
-        end
+        find(node, namespace, xpath_options) { |n| process_node_as_xml_content(n) }
+      elsif custom_parser_defined?
+        find(node, namespace, xpath_options) { |n| process_node_with_custom_parser(n) }
       else
-
-        # When not a primitive type or XMLContent then default to using the
-        # class method #parse of the type class. If the option 'parser' has been
-        # defined then call that method on the type class instead of #parse
-
-        if options[:parser]
-          find(node, namespace, xpath_options) do |n|
-            if n.respond_to?(:content) && !options[:raw]
-              value = n.content
-            else
-              value = n.to_s
-            end
-
-            begin
-              constant.send(options[:parser].to_sym, value)
-            rescue
-              nil
-            end
-          end
-        else
-          constant.parse(node, options.merge(:namespaces => xpath_options))
-        end
+        process_node_with_default_parser(node,:namespaces => xpath_options)
       end
+
     end
 
     def xpath(namespace = self.namespace)
@@ -87,20 +53,12 @@ module HappyMapper
       xpath
     end
 
-    # @return [Boolean] true if the type defined for the item is defined in the
-    #     list of primite types {Types}.
-    def primitive?
-      Types.include?(constant)
-    end
-
     def method_name
       @method_name ||= name.tr('-', '_')
     end
 
     #
-    # When the type of the item is a primitive type, this will convert value specifed
-    # to the particular primitive type. If it fails during this process it will
-    # return the original String value.
+    # Convert the value into the correct type.
     #
     # @param [String] value the string value parsed from the XML value that will
     #     be converted to the particular primitive type.
@@ -109,62 +67,92 @@ module HappyMapper
     #     to the new type.
     #
     def typecast(value)
-      return value if value.kind_of?(constant) || value.nil?
-      begin
-        if    constant == String    then value.to_s
-        elsif constant == Float     then value.to_f
-        elsif constant == Time      then Time.parse(value.to_s) rescue Time.at(value.to_i)
-        elsif constant == Date      then Date.parse(value.to_s)
-        elsif constant == DateTime  then DateTime.parse(value.to_s)
-        elsif constant == Boolean   then ['true', 't', '1', 'yes', 'y'].include?(value.to_s.downcase)
-        elsif constant == Integer
-          # ganked from datamapper
-          value_to_i = value.to_i
-          if value_to_i == 0 && value != '0'
-            value_to_s = value.to_s
-            begin
-              Integer(value_to_s =~ /^(\d+)/ ? $1 : value_to_s)
-            rescue ArgumentError
-              nil
-            end
-          else
-            value_to_i
-          end
-        else
-          value
-        end
-      rescue
-        value
-      end
+      typecaster(value).apply(value)
     end
+
 
     private
 
-      #
-      # Convert any String defined types into their constant version so that
-      # the method #parse or the custom defined parser method would be used.
-      #
-      # @param [String,Constant] type is the name of the class or the constant
-      #     for the class.
-      # @return [Constant] the constant of the type
-      #
-      def constantize(type)
-        if type.is_a?(String)
-          names = type.split('::')
-          constant = Object
-          names.each do |name|
-            constant =
-              if constant.const_defined?(name)
-                constant.const_get(name)
-              else
-                constant.const_missing(name)
-              end
-          end
-          constant
-        else
-          type
-        end
+    # @return [Boolean] true if the type defined for the item is defined in the
+    #     list of support types.
+    def suported_type_registered?
+      SupportedTypes.types.map {|caster| caster.type }.include?(constant)
+    end
+
+    # @return [#apply] the typecaster object that will be able to convert
+    #   the value into a value with the correct type.
+    def typecaster(value)
+      SupportedTypes.types.find { |caster| caster.apply?(value,constant) }
+    end
+
+    #
+    # Processes a Nokogiri::XML::Node as a supported type
+    #
+    def process_node_as_supported_type(node)
+      content = node.respond_to?(:content) ? node.content : node
+      typecast(content)
+    end
+
+    #
+    # Process a Nokogiri::XML::Node as XML Content
+    #
+    def process_node_as_xml_content(node)
+      node = node.children if node.respond_to?(:children)
+      node.respond_to?(:to_xml) ? node.to_xml : node.to_s
+    end
+
+    #
+    # A custom parser is a custom parse method on the class. When the parser
+    # option has been set this value is the name of the method which will be
+    # used to parse the node content.
+    #
+    def custom_parser_defined?
+      options[:parser]
+    end
+
+    def process_node_with_custom_parser(node)
+      if node.respond_to?(:content) && !options[:raw]
+        value = node.content
+      else
+        value = node.to_s
       end
-    # end private methods
+
+      begin
+        constant.send(options[:parser].to_sym, value)
+      rescue
+        nil
+      end
+    end
+
+    def process_node_with_default_parser(node,parse_options)
+      constant.parse(node,options.merge(parse_options))
+    end
+
+    #
+    # Convert any String defined types into their constant version so that
+    # the method #parse or the custom defined parser method would be used.
+    #
+    # @param [String,Constant] type is the name of the class or the constant
+    #     for the class.
+    # @return [Constant] the constant of the type
+    #
+    def constantize(type)
+      type.is_a?(String) ? convert_string_to_constant(type) : type
+    end
+
+    def convert_string_to_constant(type)
+      names = type.split('::')
+      constant = Object
+      names.each do |name|
+        constant =
+          if constant.const_defined?(name)
+            constant.const_get(name)
+          else
+            constant.const_missing(name)
+          end
+      end
+      constant
+    end
+
   end
 end

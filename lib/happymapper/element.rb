@@ -34,14 +34,15 @@ module HappyMapper
     def handle_attributes_option(result, value, xpath_options)
       if options[:attributes].is_a?(Hash)
         result = result.first unless result.respond_to?(:attribute_nodes)
+        return unless result
 
         result.attribute_nodes.each do |xml_attribute|
           if attribute_options = options[:attributes][xml_attribute.name.to_sym]
             attribute_value = Attribute.new(xml_attribute.name.to_sym, *attribute_options).from_xml_node(result, namespace, xpath_options)
 
             result.instance_eval <<-EOV
-                def value.#{xml_attribute.name}
-            #{attribute_value.inspect}
+                def value.#{xml_attribute.name.gsub(/\-/, '_')}
+                  #{attribute_value.inspect}
                 end
             EOV
           end # if attributes_options

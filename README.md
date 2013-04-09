@@ -42,6 +42,30 @@ Let's start with a simple example to get our feet wet. Here we have a simple exa
       <country code="de">Germany</country>
     </address>
 
+Happymapper provides support for simple, zero configuration parsing as well as the ability to model the XML content in classes.
+
+## HappyMapper.parse(XML)
+
+With no classes or configuration you can parse the example XML with little effort:
+
+```ruby
+address = HappyMapper.parse(ADDRESS_XML_DATA)
+address.street # => Milchstrasse
+address.housenumber # => 23
+address.postcode # => 26131
+address.city # => Oldenburg
+address.country.code # => de
+address.country.content # => Germany
+```
+
+It is important to be aware that this no configuration parsing is limited in capacity:
+
+* All element names are converted to accessor methods with [underscorized](http://rubydoc.info/gems/activesupport/ActiveSupport/Inflector:underscore) names
+* All value fields are left as String types
+* Determining if there is just one or multiple child elements is hard, so it assumes it is one until it finds another with the same name.
+
+## Address.parse(XML)
+
 Happymapper will let you easily model this information as a class:
 
     require 'happymapper'

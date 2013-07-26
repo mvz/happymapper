@@ -780,6 +780,10 @@ describe HappyMapper do
     feed.link.last.href.should == 'http://www.example.com/tv_shows.atom'
   end
 
+  it "parses xml with optional elements with embedded attributes" do
+    expect { CurrentWeather.parse(fixture_file('current_weather_missing_elements.xml')) }.to_not raise_error()
+  end
+
   it "returns nil rather than empty array for absent values when :single => true" do
     address = Address.parse('<?xml version="1.0" encoding="UTF-8"?><foo/>', :single => true)
     address.should be_nil

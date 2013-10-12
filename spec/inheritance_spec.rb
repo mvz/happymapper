@@ -19,6 +19,52 @@ describe "Using inheritance to share elements and attributes" do
     has_many :immunities, String
   end
 
+  class Overwrite < Parent
+    include HappyMapper
+
+    attribute :love, String
+    element :genetics, Integer
+  end
+
+  describe "Overwrite" do
+    let(:subject) do
+      xml = '<overwrite love="love" naivety="trusting"><genetics>1001</genetics><immunities>Chicken Pox</immunities></overwrite>'
+      Overwrite.parse(xml, single: true)
+    end
+
+    it 'overrides the parent elements and attributes' do
+      expect(Overwrite.attributes.count).to be == Parent.attributes.count
+      expect(Overwrite.elements.count).to be == Parent.elements.count
+    end
+
+    context "when parsing xml" do
+      it 'parses the new overwritten attribut' do
+        expect(subject.love).to be == "love"
+      end
+
+      it 'parses the new overwritten element' do
+        expect(subject.genetics).to be == 1001
+      end
+    end
+
+    context "when saving to xml" do
+      subject do
+        overwrite = Overwrite.new
+        overwrite.genetics = 1
+        overwrite.love = "love"
+        Nokogiri::XML(overwrite.to_xml).root
+      end
+
+      it 'has only 1 genetics element' do
+        expect(subject.xpath('//genetics').count).to be == 1
+      end
+
+      it 'has only 1 love attribute' do
+        expect(subject.xpath('@love').text).to be == "love"
+      end
+    end
+  end
+
   describe "Child", "a subclass of the Parent" do
     let(:subject) do
       xml = '<child love="99" naivety="trusting"><genetics>ABBA</genetics><immunities>Chicken Pox</immunities></child>'

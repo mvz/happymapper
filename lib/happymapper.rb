@@ -14,15 +14,17 @@ module HappyMapper
   def self.included(base)
     if !(base.superclass <= HappyMapper)
       base.instance_eval do
-        @attributes = []
-        @elements = []
+        @attributes = {}
+        @elements = {}
         @registered_namespaces = {}
         @wrapper_anonymous_classes = {}
       end
     else
       base.instance_eval do
-        @attributes = superclass.attributes.dup
-        @elements = superclass.elements.dup
+        @attributes =
+            superclass.instance_variable_get(:@attributes).dup
+        @elements =
+            superclass.instance_variable_get(:@elements).dup
         @registered_namespaces =
             superclass.instance_variable_get(:@registered_namespaces).dup
         @wrapper_anonymous_classes =
@@ -52,7 +54,7 @@ module HappyMapper
     #
     def attribute(name, type, options={})
       attribute = Attribute.new(name, type, options)
-      @attributes << attribute
+      @attributes[name] = attribute
       attr_accessor attribute.method_name.intern
     end
 
@@ -63,7 +65,7 @@ module HappyMapper
     #     an empty array is returned when there have been no attributes defined.
     #
     def attributes
-      @attributes
+      @attributes.values
     end
 
     #
@@ -107,7 +109,7 @@ module HappyMapper
     #
     def element(name, type, options={})
       element = Element.new(name, type, options)
-      @elements << element
+      @elements[name] = element
       attr_accessor element.method_name.intern
     end
 
@@ -119,7 +121,7 @@ module HappyMapper
     #     defined.
     #
     def elements
-      @elements
+      @elements.values
     end
 
     #

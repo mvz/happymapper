@@ -1,0 +1,18 @@
+<aws:weather xmlns:aws="http://www.aws.com/aws">
+  <aws:api version="2.0"/>
+  <aws:WebURL>http://weather.weatherbug.com/IN/Carmel-weather.html?ZCode=Z5546&amp;Units=0&amp;stat=MOCAR</aws:WebURL>
+  <aws:ob>
+    <aws:ob-date>
+      <aws:year number="2008"/>
+      <aws:month number="12" text="December" abbrv="Dec"/>
+      <aws:day number="30" text="Tuesday" abbrv="Tue"/>
+      <aws:hour number="4" hour-24="16"/>
+      <aws:minute number="18"/>
+      <aws:second number="01"/>
+      <aws:am-pm abbrv="PM"/>
+      <aws:time-zone offset="-5" text="Eastern Standard Time" abbrv="EST"/>
+    </aws:ob-date>
+    <aws:feels-like units="&amp;deg;F">51</aws:feels-like>
+    <aws:temp units="&amp;deg;F">51.8</aws:temp>
+  </aws:ob>
+</aws:weather>

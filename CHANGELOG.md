@@ -1,3 +1,7 @@
+## 0.5.9 / 2014-02-18
+
+* Correctly output boolean element value 'false'  (confusion)
+
 ## 0.5.8 / 2013-10-12
 
 * Allow child elements to remove their parent's namespacing (dcarneiro)

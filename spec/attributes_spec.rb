@@ -18,7 +18,7 @@ describe "Attribute Method Conversion" do
   end
 
   let(:document) do
-    AttributeMethodConversion::Document.parse(xml_document,single: true)
+    AttributeMethodConversion::Document.parse(xml_document, :single => true)
   end
 
   it "link" do

@@ -29,16 +29,16 @@ describe "A document with mixed namespaces" do
       # Here each of the elements have their namespace set to nil to reset their
       # namespace so that it is not the same as the prefix namespace
 
-      has_many :streets, String, tag: 'street', namespace: nil
+      has_many :streets, String, :tag => 'street', :namespace => nil
 
-      has_one :house_number, String, tag: 'housenumber', namespace: nil
-      has_one :postcode, String, namespace: 'different'
-      has_one :city, String, namespace: nil
+      has_one :house_number, String, :tag => 'housenumber', :namespace => nil
+      has_one :postcode, String, :namespace => 'different'
+      has_one :city, String, :namespace => nil
     end
   end
 
   let(:address) do
-    MixedNamespaces::Address.parse(xml_document, single: true)
+    MixedNamespaces::Address.parse(xml_document, :single => true)
   end
 
 

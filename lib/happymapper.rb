@@ -16,6 +16,7 @@ module HappyMapper
       base.instance_eval do
         @attributes = {}
         @elements = {}
+        @order = []
         @registered_namespaces = {}
         @wrapper_anonymous_classes = {}
       end
@@ -25,6 +26,8 @@ module HappyMapper
             superclass.instance_variable_get(:@attributes).dup
         @elements =
             superclass.instance_variable_get(:@elements).dup
+        @order =
+            superclass.instance_variable_get(:@order).dup
         @registered_namespaces =
             superclass.instance_variable_get(:@registered_namespaces).dup
         @wrapper_anonymous_classes =
@@ -110,6 +113,7 @@ module HappyMapper
     def element(name, type, options={})
       element = Element.new(name, type, options)
       @elements[name] = element
+      @order << name unless @order.include? name
       attr_accessor element.method_name.intern
     end
 
@@ -121,7 +125,7 @@ module HappyMapper
     #     defined.
     #
     def elements
-      @elements.values
+      @order.map { |name| @elements[name] }
     end
 
     #

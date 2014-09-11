@@ -31,15 +31,17 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<nokogiri>, "~> 1.5" )
-      s.add_development_dependency(%q<rspec>, ["~> 2.8"])
+      s.add_runtime_dependency 'nokogiri', '~> 1.5.0'
+      s.add_development_dependency 'rspec', '~> 2.8'
+      s.add_development_dependency 'rake'
+      s.add_development_dependency 'rb-fsevent', '~> 0.9'
+      s.add_development_dependency 'guard-rspec' if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('1.9.2')
     else
-      s.add_dependency(%q<nokogiri>, "~> 1.5" )
+        s.add_dependency(%q<nokogiri>, "~> 1.5.0" )
       s.add_dependency(%q<rspec>, ["~> 2.8"])
     end
   else
-    s.add_dependency(%q<nokogiri>, "~> 1.5" )
+      s.add_dependency(%q<nokogiri>, "~> 1.5.0" )
     s.add_dependency(%q<rspec>, ["~> 2.8"])
   end
 end
-

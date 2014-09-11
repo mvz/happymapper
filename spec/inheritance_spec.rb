@@ -29,7 +29,7 @@ describe "Using inheritance to share elements and attributes" do
   describe "Overwrite" do
     let(:subject) do
       xml = '<overwrite love="love" naivety="trusting"><genetics>1001</genetics><immunities>Chicken Pox</immunities></overwrite>'
-      Overwrite.parse(xml, single: true)
+      Overwrite.parse(xml, :single => true)
     end
 
     it 'overrides the parent elements and attributes' do

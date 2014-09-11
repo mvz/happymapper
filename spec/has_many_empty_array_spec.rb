@@ -13,9 +13,9 @@ module Sheep
     # The idea is that it should not find the empty items contained within the
     # xml and return an empty array. This exercises the order of how nodes
     # are searched for within an XML document.
-    has_many :items, Item, tag: 'item'
+    has_many :items, Item, :tag => 'item'
 
-    has_many :items_with_a_different_name, Item, tag: 'item'
+    has_many :items_with_a_different_name, Item, :tag => 'item'
 
   end
 end

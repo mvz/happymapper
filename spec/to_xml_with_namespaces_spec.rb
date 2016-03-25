@@ -104,6 +104,46 @@ module ToXMLWithNamespaces
       parameters.each_pair {|property,value| send("#{property}=",value) if respond_to?("#{property}=") }
     end
   end
+
+  #
+  # This class is another example of a class that has a default namespace
+  #xmlns="urn:eventis:prodis:onlineapi:1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  #
+  class RecipeDefault
+    include HappyMapper
+
+    # this is the default namespace of the document
+    register_namespace DEFAULT_NS, 'urn:eventis:prodis:onlineapi:1.0'
+    register_namespace 'xsi', "http://www.w3.org/2001/XMLSchema-instance"
+    register_namespace 'xsd', "http://www.w3.org/2001/XMLSchema"
+
+    has_many :ingredients, String
+
+    def initialize(parameters)
+      parameters.each_pair {|property,value| send("#{property}=",value) if respond_to?("#{property}=") }
+    end
+  end
+
+  #
+  # This class is an example of a class that has a field with a default namespace
+  # to_xml method should not render prefixes for such fields
+  #
+  class NamespacedElements
+    include HappyMapper
+
+    # this is the default namespace of the document
+    register_namespace DEFAULT_NS, 'urn:eventis:prodis:onlineapi:1.0'
+    register_namespace 'xsi', "http://www.w3.org/2001/XMLSchema-instance"
+
+    namespace 'xsi'
+    element :xsi_field, String
+    element :default_field, String, :namespace => DEFAULT_NS
+
+    def initialize(parameters)
+      self.xsi_field = parameters[:xsi_field]
+      self.default_field = parameters[:default_field]
+    end
+  end
 end
 
 describe "Saving #to_xml", "with xml namespaces" do
@@ -191,6 +231,21 @@ describe "Saving #to_xml", "with xml namespaces" do
     it "writes the default namespace to xml without repeating xmlns" do
       recipe = ToXMLWithNamespaces::Recipe.new(:ingredients => ['One Cup Flour', 'Two Scoops of Lovin'])
       expect(recipe.to_xml).to match /xmlns=\"urn:eventis:prodis:onlineapi:1\.0\"/
+    end
+  end
+
+  context "with the DEFAULT_NS namespace" do
+    it "writes the default namespace to xml without repeating xmlns" do
+      recipe = ToXMLWithNamespaces::RecipeDefault.new(:ingredients => ['One Cup Flour', 'Two Scoops of Lovin'])
+      expect(recipe.to_xml).to match /xmlns=\"urn:eventis:prodis:onlineapi:1\.0\"/
+    end
+  end
+
+  context "when an element is defined with DEFAULT_NS namespace" do
+    it "writes the element without prefix" do
+      recipe = ToXMLWithNamespaces::NamespacedElements.new(:xsi_field => "XSI VALUE", :default_field => "DEFAULT VALUE")
+      expect(recipe.to_xml).to match /<default_field>/
+      expect(recipe.to_xml).to match /<xsi:xsi_field>/
     end
   end
 

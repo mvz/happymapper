@@ -9,24 +9,24 @@ describe HappyMapper do
       subject { described_class.parse fixture_file('address.xml') }
 
       it "should parse child elements" do
-        subject.street.should == "Milchstrasse"
-        subject.housenumber.should == "23"
-        subject.postcode.should == "26131"
-        subject.city.should == "Oldenburg"
+        expect(subject.street).to eq("Milchstrasse")
+        expect(subject.housenumber).to eq("23")
+        expect(subject.postcode).to eq("26131")
+        expect(subject.city).to eq("Oldenburg")
       end
 
       it "should not create a content entry when the xml contents no text content" do
-        subject.should_not respond_to :content
+        expect(subject).not_to respond_to :content
       end
 
       context "child elements with attributes" do
 
         it "should parse the attributes" do
-          subject.country.code.should == "de"
+          expect(subject.country.code).to eq("de")
         end
 
         it "should parse the content" do
-          subject.country.content.should == "Germany"
+          expect(subject.country.content).to eq("Germany")
         end
 
       end
@@ -37,7 +37,7 @@ describe HappyMapper do
       subject { described_class.parse fixture_file('ambigous_items.xml') }
 
       it "should create accessor methods with similar names" do
-        subject.my_items.item.should be_kind_of Array
+        expect(subject.my_items.item).to be_kind_of Array
       end
     end
 
@@ -46,9 +46,9 @@ describe HappyMapper do
       subject { described_class.parse fixture_file('subclass_namespace.xml') }
 
       it "should parse the elements and values correctly" do
-        subject.title.should == "article title"
-        subject.photo.publish_options.author.should == "Stephanie"
-        subject.gallery.photo.title.should == "photo title"
+        expect(subject.title).to eq("article title")
+        expect(subject.photo.publish_options.author).to eq("Stephanie")
+        expect(subject.gallery.photo.title).to eq("photo title")
       end
     end
 
@@ -56,7 +56,7 @@ describe HappyMapper do
       subject { described_class.parse fixture_file('ambigous_items.xml') }
 
       it "should parse the entire relationship" do
-        subject.my_items.item.first.item.name.should == "My first internal item"
+        expect(subject.my_items.item.first.item.name).to eq("My first internal item")
       end
     end
 
@@ -66,8 +66,8 @@ describe HappyMapper do
 
       it "should parse the elements as it would a 'has_many'" do
 
-        subject.name.should == "value"
-        subject.image.should == [ "image1", "image2" ]
+        expect(subject.name).to eq("value")
+        expect(subject.image).to eq([ "image1", "image2" ])
 
       end
 
@@ -78,7 +78,7 @@ describe HappyMapper do
       subject { described_class.parse fixture_file('subclass_namespace.xml') }
 
       it "should parse the elements an values correctly" do
-        subject.title.should == "article title"
+        expect(subject.title).to eq("article title")
       end
     end
 
@@ -103,8 +103,8 @@ describe HappyMapper do
         AfterParseSpec::Address.after_parse(&cb2)
 
         object = AfterParseSpec::Address.parse fixture_file('address.xml')
-        from_cb.should == object
-        called.should == true
+        expect(from_cb).to eq(object)
+        expect(called).to eq(true)
       end
     end
 

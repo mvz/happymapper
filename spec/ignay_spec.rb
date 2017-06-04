@@ -43,40 +43,40 @@ end
 describe HappyMapper do
 
   it "should not be nil" do
-    catalog_tree.should_not be_nil
+    expect(catalog_tree).not_to be_nil
   end
 
   it "should have the attribute code" do
-    catalog_tree.code.should == "NLD"
+    expect(catalog_tree.code).to eq("NLD")
   end
 
   it "should have many nodes" do
-    catalog_tree.nodes.should_not be_empty
-    catalog_tree.nodes.length.should == 2
+    expect(catalog_tree.nodes).not_to be_empty
+    expect(catalog_tree.nodes.length).to eq(2)
   end
 
   context "first node" do
 
     it "should have a name" do
-      first_node.name.should == "Parent 1"
+      expect(first_node.name).to eq("Parent 1")
     end
 
     it "should have translations" do
-      first_node.translations.length.should == 2
+      expect(first_node.translations.length).to eq(2)
 
-      first_node.translations.first.language.should == "en-GB"
+      expect(first_node.translations.first.language).to eq("en-GB")
 
-      first_node.translations.last.name.should == "Parent 1 de"
+      expect(first_node.translations.last.name).to eq("Parent 1 de")
     end
 
     it "should have subnodes" do
-      first_node.nodes.should be_kind_of(Enumerable)
-      first_node.nodes.should_not be_empty
-      first_node.nodes.length.should == 1
+      expect(first_node.nodes).to be_kind_of(Enumerable)
+      expect(first_node.nodes).not_to be_empty
+      expect(first_node.nodes.length).to eq(1)
     end
 
     it "first node - first node name" do
-      first_node.nodes.first.name.should == "First"
+      expect(first_node.nodes.first.name).to eq("First")
     end
 
     def first_node

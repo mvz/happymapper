@@ -224,7 +224,7 @@ describe "Saving #to_xml", "with xml namespaces" do
     it 'uses the element declaration namespace on the element' do
       machine = CoffeeMachine.new
       machine.beverage = Beverage.new.tap {|obj| obj.name = 'coffee'}
-      machine.to_xml.should be == expected_xml
+      expect(machine.to_xml).to eq(expected_xml)
     end
   end
 

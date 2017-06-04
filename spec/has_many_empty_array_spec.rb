@@ -34,10 +34,10 @@ describe "emptyness" do
   end
 
   it "returns an empty array" do
-    navigator.items_with_a_different_name.should be_empty
+    expect(navigator.items_with_a_different_name).to be_empty
   end
 
   it "returns an empty array" do
-    navigator.items.should be_empty
+    expect(navigator.items).to be_empty
   end
 end

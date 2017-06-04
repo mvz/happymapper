@@ -82,7 +82,7 @@ describe "Updating existing objects with .parse and #parse" do
   end
 
   it 'initial values are correct' do
-    subject.attr1.should == 'initial'
+    expect(subject.attr1).to eq('initial')
     item_is_correctly_defined( subject.items[0] )
     item_is_correctly_defined( subject.items[1] )
   end

@@ -55,14 +55,14 @@ describe "Wildcard Root Tag" do
     let(:xml) { Nokogiri::XML(subject.to_xml) }
 
     it 'should map different elements to same class' do
-      subject.blargs.should_not be_nil
-      subject.jellos.should_not be_nil
+      expect(subject.blargs).not_to be_nil
+      expect(subject.jellos).not_to be_nil
     end
 
     it 'should filter on xpath appropriately' do
-      subject.blargs.should have(2).items
-      subject.jellos.should have(1).items
-      subject.subjellos.should have(1).items
+      expect(subject.blargs.size).to eq(2)
+      expect(subject.jellos.size).to eq(1)
+      expect(subject.subjellos.size).to eq(1)
     end
 
     def base_with(name,href,other)
@@ -83,14 +83,14 @@ describe "Wildcard Root Tag" do
     end
 
     it 'should #to_xml using parent element tag name' do
-      xml.xpath('/root/description').text.should == 'some description'
+      expect(xml.xpath('/root/description').text).to eq('some description')
       validate_xpath("/root/blarg[1]","blargname1","http://blarg.com","")
       validate_xpath("/root/blarg[2]","blargname2","http://blarg.com","")
       validate_xpath("/root/jello[1]","jelloname","http://jello.com","")
     end
 
     it "should properly respect child HappyMapper tags if tag isn't provided on the element defintion" do
-      xml.xpath('root/subelement').should have(1).item
+      expect(xml.xpath('root/subelement').size).to eq(1)
     end
   end
 end

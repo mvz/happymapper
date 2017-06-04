@@ -583,99 +583,99 @@ describe HappyMapper do
     class Boo; include HappyMapper end
 
     it "should set attributes to an array" do
-      @klass.attributes.should == []
+      expect(@klass.attributes).to eq([])
     end
 
     it "should set @elements to a hash" do
-      @klass.elements.should == []
+      expect(@klass.elements).to eq([])
     end
 
     it "should allow adding an attribute" do
-      lambda {
+      expect {
         @klass.attribute :name, String
-      }.should change(@klass, :attributes)
+      }.to change(@klass, :attributes)
     end
 
     it "should allow adding an attribute containing a dash" do
-      lambda {
+      expect {
         @klass.attribute :'bar-baz', String
-      }.should change(@klass, :attributes)
+      }.to change(@klass, :attributes)
     end
 
     it "should be able to get all attributes in array" do
       @klass.attribute :name, String
-      @klass.attributes.size.should == 1
+      expect(@klass.attributes.size).to eq(1)
     end
 
     it "should allow adding an element" do
-      lambda {
+      expect {
         @klass.element :name, String
-      }.should change(@klass, :elements)
+      }.to change(@klass, :elements)
     end
 
     it "should allow adding an element containing a dash" do
-      lambda {
+      expect {
         @klass.element :'bar-baz', String
-      }.should change(@klass, :elements)
+      }.to change(@klass, :elements)
 
     end
 
     it "should be able to get all elements in array" do
       @klass.element(:name, String)
-      @klass.elements.size.should == 1
+      expect(@klass.elements.size).to eq(1)
     end
 
     it "should allow has one association" do
       @klass.has_one(:user, User)
       element = @klass.elements.first
-      element.name.should == 'user'
-      element.type.should == User
-      element.options[:single].should == true
+      expect(element.name).to eq('user')
+      expect(element.type).to eq(User)
+      expect(element.options[:single]).to eq(true)
     end
 
     it "should allow has many association" do
       @klass.has_many(:users, User)
       element = @klass.elements.first
-      element.name.should == 'users'
-      element.type.should == User
-      element.options[:single].should == false
+      expect(element.name).to eq('users')
+      expect(element.type).to eq(User)
+      expect(element.options[:single]).to eq(false)
     end
 
     it "should default tag name to lowercase class" do
-      @klass.tag_name.should == 'boo'
+      expect(@klass.tag_name).to eq('boo')
     end
 
     it "should default tag name of class in modules to the last constant lowercase" do
       module Bar; class Baz; include HappyMapper; end; end
-      Bar::Baz.tag_name.should == 'baz'
+      expect(Bar::Baz.tag_name).to eq('baz')
     end
 
     it "should allow setting tag name" do
       @klass.tag('FooBar')
-      @klass.tag_name.should == 'FooBar'
+      expect(@klass.tag_name).to eq('FooBar')
     end
 
     it "should allow setting a namespace" do
       @klass.namespace(namespace = "boo")
-      @klass.namespace.should == namespace
+      expect(@klass.namespace).to eq(namespace)
     end
 
     it "should provide #parse" do
-      @klass.should respond_to(:parse)
+      expect(@klass).to respond_to(:parse)
     end
   end
 
   describe "#attributes" do
     it "should only return attributes for the current class" do
-      Post.attributes.size.should == 7
-      Status.attributes.size.should == 0
+      expect(Post.attributes.size).to eq(7)
+      expect(Status.attributes.size).to eq(0)
     end
   end
 
   describe "#elements" do
     it "should only return elements for the current class" do
-      Post.elements.size.should == 0
-      Status.elements.size.should == 10
+      expect(Post.elements.size).to eq(0)
+      expect(Status.elements.size).to eq(10)
     end
   end
 
@@ -683,7 +683,7 @@ describe HappyMapper do
      it "should take String as default argument for type" do
        State.content :name
        address = Address.parse(fixture_file('address.xml'))
-       address.state.name.should == "Lower Saxony"
+       expect(address.state.name).to eq("Lower Saxony")
        address.state.name.class == String
      end
 
@@ -691,97 +691,97 @@ describe HappyMapper do
        Rate.content :value, Float
        Product.has_one :rate, Rate
        product = Product.parse(fixture_file('product_default_namespace.xml'), :single => true)
-       product.rate.value.should == 120.25
+       expect(product.rate.value).to eq(120.25)
        product.rate.class == Float
      end
   end
 
   it "should parse xml attributes into ruby objects" do
     posts = Post.parse(fixture_file('posts.xml'))
-    posts.size.should == 20
+    expect(posts.size).to eq(20)
     first = posts.first
-    first.href.should == 'http://roxml.rubyforge.org/'
-    first.hash.should == '19bba2ab667be03a19f67fb67dc56917'
-    first.description.should == 'ROXML - Ruby Object to XML Mapping Library'
-    first.tag.should == 'ruby xml gems mapping'
-    first.time.should == Time.utc(2008, 8, 9, 5, 24, 20)
-    first.others.should == 56
-    first.extended.should == 'ROXML is a Ruby library designed to make it easier for Ruby developers to work with XML. Using simple annotations, it enables Ruby classes to be custom-mapped to XML. ROXML takes care of the marshalling and unmarshalling of mapped attributes so that developers can focus on building first-class Ruby classes.'
+    expect(first.href).to eq('http://roxml.rubyforge.org/')
+    expect(first.hash).to eq('19bba2ab667be03a19f67fb67dc56917')
+    expect(first.description).to eq('ROXML - Ruby Object to XML Mapping Library')
+    expect(first.tag).to eq('ruby xml gems mapping')
+    expect(first.time).to eq(Time.utc(2008, 8, 9, 5, 24, 20))
+    expect(first.others).to eq(56)
+    expect(first.extended).to eq('ROXML is a Ruby library designed to make it easier for Ruby developers to work with XML. Using simple annotations, it enables Ruby classes to be custom-mapped to XML. ROXML takes care of the marshalling and unmarshalling of mapped attributes so that developers can focus on building first-class Ruby classes.')
   end
 
   it "should parse xml elements to ruby objcts" do
     statuses = Status.parse(fixture_file('statuses.xml'))
-    statuses.size.should == 20
+    expect(statuses.size).to eq(20)
     first = statuses.first
-    first.id.should == 882281424
-    first.created_at.should == Time.utc(2008, 8, 9, 5, 38, 12)
-    first.source.should == 'web'
-    first.truncated.should be_false
-    first.in_reply_to_status_id.should == 1234
-    first.in_reply_to_user_id.should == 12345
-    first.favorited.should be_false
-    first.user.id.should == 4243
-    first.user.name.should == 'John Nunemaker'
-    first.user.screen_name.should == 'jnunemaker'
-    first.user.location.should == 'Mishawaka, IN, US'
-    first.user.description.should == 'Loves his wife, ruby, notre dame football and iu basketball'
-    first.user.profile_image_url.should == 'http://s3.amazonaws.com/twitter_production/profile_images/53781608/Photo_75_normal.jpg'
-    first.user.url.should == 'http://addictedtonew.com'
-    first.user.protected.should be_false
-    first.user.followers_count.should == 486
+    expect(first.id).to eq(882281424)
+    expect(first.created_at).to eq(Time.utc(2008, 8, 9, 5, 38, 12))
+    expect(first.source).to eq('web')
+    expect(first.truncated).to be_falsey
+    expect(first.in_reply_to_status_id).to eq(1234)
+    expect(first.in_reply_to_user_id).to eq(12345)
+    expect(first.favorited).to be_falsey
+    expect(first.user.id).to eq(4243)
+    expect(first.user.name).to eq('John Nunemaker')
+    expect(first.user.screen_name).to eq('jnunemaker')
+    expect(first.user.location).to eq('Mishawaka, IN, US')
+    expect(first.user.description).to eq('Loves his wife, ruby, notre dame football and iu basketball')
+    expect(first.user.profile_image_url).to eq('http://s3.amazonaws.com/twitter_production/profile_images/53781608/Photo_75_normal.jpg')
+    expect(first.user.url).to eq('http://addictedtonew.com')
+    expect(first.user.protected).to be_falsey
+    expect(first.user.followers_count).to eq(486)
   end
 
   it "should parse xml containing the desired element as root node" do
     address = Address.parse(fixture_file('address.xml'), :single => true)
-    address.street.should == 'Milchstrasse'
-    address.postcode.should == '26131'
-    address.housenumber.should == '23'
-    address.city.should == 'Oldenburg'
-    address.country.class.should == Country
+    expect(address.street).to eq('Milchstrasse')
+    expect(address.postcode).to eq('26131')
+    expect(address.housenumber).to eq('23')
+    expect(address.city).to eq('Oldenburg')
+    expect(address.country.class).to eq(Country)
   end
 
   it "should parse text node correctly" do
     address = Address.parse(fixture_file('address.xml'), :single => true)
-    address.country.name.should == 'Germany'
-    address.country.code.should == 'de'
+    expect(address.country.name).to eq('Germany')
+    expect(address.country.code).to eq('de')
   end
 
   it "should treat Nokogiri::XML::Document as root" do
     doc = Nokogiri::XML(fixture_file('address.xml'))
     address = Address.parse(doc)
-    address.class.should == Address
+    expect(address.class).to eq(Address)
   end
 
   it "should parse xml with default namespace (amazon)" do
     file_contents = fixture_file('pita.xml')
     items = PITA::Items.parse(file_contents, :single => true)
-    items.total_results.should == 22
-    items.total_pages.should == 3
+    expect(items.total_results).to eq(22)
+    expect(items.total_pages).to eq(3)
     first  = items.items[0]
     second = items.items[1]
-    first.asin.should == '0321480791'
-    first.point.should == '38.5351715088 -121.7948684692'
-    first.detail_page_url.should be_a_kind_of(URI)
-    first.detail_page_url.to_s.should == 'http://www.amazon.com/gp/redirect.html%3FASIN=0321480791%26tag=ws%26lcode=xm2%26cID=2025%26ccmID=165953%26location=/o/ASIN/0321480791%253FSubscriptionId=dontbeaswoosh'
-    first.manufacturer.should == 'Addison-Wesley Professional'
-    first.product_group.should == '<ProductGroup>Book</ProductGroup>'
-    second.asin.should == '047022388X'
-    second.manufacturer.should == 'Wrox'
+    expect(first.asin).to eq('0321480791')
+    expect(first.point).to eq('38.5351715088 -121.7948684692')
+    expect(first.detail_page_url).to be_a_kind_of(URI)
+    expect(first.detail_page_url.to_s).to eq('http://www.amazon.com/gp/redirect.html%3FASIN=0321480791%26tag=ws%26lcode=xm2%26cID=2025%26ccmID=165953%26location=/o/ASIN/0321480791%253FSubscriptionId=dontbeaswoosh')
+    expect(first.manufacturer).to eq('Addison-Wesley Professional')
+    expect(first.product_group).to eq('<ProductGroup>Book</ProductGroup>')
+    expect(second.asin).to eq('047022388X')
+    expect(second.manufacturer).to eq('Wrox')
   end
 
   it "should parse xml that has attributes of elements" do
     items = CurrentWeather.parse(fixture_file('current_weather.xml'))
     first = items[0]
-    first.temperature.should == 51
-    first.feels_like.should == 51
-    first.current_condition.should == 'Sunny'
-    first.current_condition.icon.should == 'http://deskwx.weatherbug.com/images/Forecast/icons/cond007.gif'
+    expect(first.temperature).to eq(51)
+    expect(first.feels_like).to eq(51)
+    expect(first.current_condition).to eq('Sunny')
+    expect(first.current_condition.icon).to eq('http://deskwx.weatherbug.com/images/Forecast/icons/cond007.gif')
   end
 
   it "parses xml with attributes of elements that aren't :single => true" do
     feed = Atom::Feed.parse(fixture_file('atom.xml'))
-    feed.link.first.href.should == 'http://www.example.com'
-    feed.link.last.href.should == 'http://www.example.com/tv_shows.atom'
+    expect(feed.link.first.href).to eq('http://www.example.com')
+    expect(feed.link.last.href).to eq('http://www.example.com/tv_shows.atom')
   end
 
   it "parses xml with optional elements with embedded attributes" do
@@ -790,134 +790,134 @@ describe HappyMapper do
 
   it "returns nil rather than empty array for absent values when :single => true" do
     address = Address.parse('<?xml version="1.0" encoding="UTF-8"?><foo/>', :single => true)
-    address.should be_nil
+    expect(address).to be_nil
   end
 
   it "should return same result for absent values when :single => true, regardless of :in_groups_of" do
     addr1 = Address.parse('<?xml version="1.0" encoding="UTF-8"?><foo/>', :single => true)
     addr2 = Address.parse('<?xml version="1.0" encoding="UTF-8"?><foo/>', :single => true, :in_groups_of => 10)
-    addr1.should == addr2
+    expect(addr1).to eq(addr2)
   end
 
   it "should parse xml with nested elements" do
     radars = Radar.parse(fixture_file('radar.xml'))
     first = radars[0]
-    first.places.size.should == 1
-    first.places[0].name.should == 'Store'
+    expect(first.places.size).to eq(1)
+    expect(first.places[0].name).to eq('Store')
     second = radars[1]
-    second.places.size.should == 0
+    expect(second.places.size).to eq(0)
     third = radars[2]
-    third.places.size.should == 2
-    third.places[0].name.should == 'Work'
-    third.places[1].name.should == 'Home'
+    expect(third.places.size).to eq(2)
+    expect(third.places[0].name).to eq('Work')
+    expect(third.places[1].name).to eq('Home')
   end
 
   it "should parse xml with element name different to class name" do
     game = QuarterTest::Game.parse(fixture_file('quarters.xml'))
-    game.q1.start.should == '4:40:15 PM'
-    game.q2.start.should == '5:18:53 PM'
+    expect(game.q1.start).to eq('4:40:15 PM')
+    expect(game.q2.start).to eq('5:18:53 PM')
   end
 
   it "should parse xml that has elements with dashes" do
     commit = GitHub::Commit.parse(fixture_file('commit.xml'))
-    commit.message.should == "move commands.rb and helpers.rb into commands/ dir"
-    commit.url.should == "http://github.com/defunkt/github-gem/commit/c26d4ce9807ecf57d3f9eefe19ae64e75bcaaa8b"
-    commit.id.should == "c26d4ce9807ecf57d3f9eefe19ae64e75bcaaa8b"
-    commit.committed_date.should == Date.parse("2008-03-02T16:45:41-08:00")
-    commit.tree.should == "28a1a1ca3e663d35ba8bf07d3f1781af71359b76"
+    expect(commit.message).to eq("move commands.rb and helpers.rb into commands/ dir")
+    expect(commit.url).to eq("http://github.com/defunkt/github-gem/commit/c26d4ce9807ecf57d3f9eefe19ae64e75bcaaa8b")
+    expect(commit.id).to eq("c26d4ce9807ecf57d3f9eefe19ae64e75bcaaa8b")
+    expect(commit.committed_date).to eq(Date.parse("2008-03-02T16:45:41-08:00"))
+    expect(commit.tree).to eq("28a1a1ca3e663d35ba8bf07d3f1781af71359b76")
   end
 
   it "should parse xml with no namespace" do
     product = Product.parse(fixture_file('product_no_namespace.xml'), :single => true)
-    product.title.should == "A Title"
-    product.feature_bullets.bug.should == 'This is a bug'
-    product.feature_bullets.features.size.should == 2
-    product.feature_bullets.features[0].name.should == 'This is feature text 1'
-    product.feature_bullets.features[1].name.should == 'This is feature text 2'
+    expect(product.title).to eq("A Title")
+    expect(product.feature_bullets.bug).to eq('This is a bug')
+    expect(product.feature_bullets.features.size).to eq(2)
+    expect(product.feature_bullets.features[0].name).to eq('This is feature text 1')
+    expect(product.feature_bullets.features[1].name).to eq('This is feature text 2')
   end
 
   it "should parse xml with default namespace" do
     product = Product.parse(fixture_file('product_default_namespace.xml'), :single => true)
-    product.title.should == "A Title"
-    product.feature_bullets.bug.should == 'This is a bug'
-    product.feature_bullets.features.size.should == 2
-    product.feature_bullets.features[0].name.should == 'This is feature text 1'
-    product.feature_bullets.features[1].name.should == 'This is feature text 2'
+    expect(product.title).to eq("A Title")
+    expect(product.feature_bullets.bug).to eq('This is a bug')
+    expect(product.feature_bullets.features.size).to eq(2)
+    expect(product.feature_bullets.features[0].name).to eq('This is feature text 1')
+    expect(product.feature_bullets.features[1].name).to eq('This is feature text 2')
   end
 
   it "should parse xml with single namespace" do
     product = Product.parse(fixture_file('product_single_namespace.xml'), :single => true)
-    product.title.should == "A Title"
-    product.feature_bullets.bug.should == 'This is a bug'
-    product.feature_bullets.features.size.should == 2
-    product.feature_bullets.features[0].name.should == 'This is feature text 1'
-    product.feature_bullets.features[1].name.should == 'This is feature text 2'
+    expect(product.title).to eq("A Title")
+    expect(product.feature_bullets.bug).to eq('This is a bug')
+    expect(product.feature_bullets.features.size).to eq(2)
+    expect(product.feature_bullets.features[0].name).to eq('This is feature text 1')
+    expect(product.feature_bullets.features[1].name).to eq('This is feature text 2')
   end
 
   it "should parse xml with multiple namespaces" do
     track = FedEx::TrackReply.parse(fixture_file('multiple_namespaces.xml'))
-    track.highest_severity.should == 'SUCCESS'
-    track.more_data.should be_false
+    expect(track.highest_severity).to eq('SUCCESS')
+    expect(track.more_data).to be_falsey
     notification = track.notifications.first
-    notification.code.should == 0
-    notification.localized_message.should == 'Request was successfully processed.'
-    notification.message.should == 'Request was successfully processed.'
-    notification.severity.should == 'SUCCESS'
-    notification.source.should == 'trck'
+    expect(notification.code).to eq(0)
+    expect(notification.localized_message).to eq('Request was successfully processed.')
+    expect(notification.message).to eq('Request was successfully processed.')
+    expect(notification.severity).to eq('SUCCESS')
+    expect(notification.source).to eq('trck')
     detail = track.trackdetails.first
-    detail.carrier_code.should == 'FDXG'
-    detail.est_delivery.should == '2009-01-02T00:00:00'
-    detail.service_info.should == 'Ground-Package Returns Program-Domestic'
-    detail.status_code.should == 'OD'
-    detail.status_desc.should == 'On FedEx vehicle for delivery'
-    detail.tracking_number.should == '9611018034267800045212'
-    detail.weight.units.should == 'LB'
-    detail.weight.value.should == 2
+    expect(detail.carrier_code).to eq('FDXG')
+    expect(detail.est_delivery).to eq('2009-01-02T00:00:00')
+    expect(detail.service_info).to eq('Ground-Package Returns Program-Domestic')
+    expect(detail.status_code).to eq('OD')
+    expect(detail.status_desc).to eq('On FedEx vehicle for delivery')
+    expect(detail.tracking_number).to eq('9611018034267800045212')
+    expect(detail.weight.units).to eq('LB')
+    expect(detail.weight.value).to eq(2)
     events = detail.events
-    events.size.should == 10
+    expect(events.size).to eq(10)
     first_event = events[0]
-    first_event.eventdescription.should == 'On FedEx vehicle for delivery'
-    first_event.eventtype.should == 'OD'
-    first_event.timestamp.should == '2009-01-02T06:00:00'
-    first_event.address.city.should == 'WICHITA'
-    first_event.address.countrycode.should == 'US'
-    first_event.address.residential.should be_false
-    first_event.address.state.should == 'KS'
-    first_event.address.zip.should == '67226'
+    expect(first_event.eventdescription).to eq('On FedEx vehicle for delivery')
+    expect(first_event.eventtype).to eq('OD')
+    expect(first_event.timestamp).to eq('2009-01-02T06:00:00')
+    expect(first_event.address.city).to eq('WICHITA')
+    expect(first_event.address.countrycode).to eq('US')
+    expect(first_event.address.residential).to be_falsey
+    expect(first_event.address.state).to eq('KS')
+    expect(first_event.address.zip).to eq('67226')
     last_event = events[-1]
-    last_event.eventdescription.should == 'In FedEx possession'
-    last_event.eventtype.should == 'IP'
-    last_event.timestamp.should == '2008-12-27T09:40:00'
-    last_event.address.city.should == 'LONGWOOD'
-    last_event.address.countrycode.should == 'US'
-    last_event.address.residential.should be_false
-    last_event.address.state.should == 'FL'
-    last_event.address.zip.should == '327506398'
-    track.tran_detail.cust_tran_id.should == '20090102-111321'
+    expect(last_event.eventdescription).to eq('In FedEx possession')
+    expect(last_event.eventtype).to eq('IP')
+    expect(last_event.timestamp).to eq('2008-12-27T09:40:00')
+    expect(last_event.address.city).to eq('LONGWOOD')
+    expect(last_event.address.countrycode).to eq('US')
+    expect(last_event.address.residential).to be_falsey
+    expect(last_event.address.state).to eq('FL')
+    expect(last_event.address.zip).to eq('327506398')
+    expect(track.tran_detail.cust_tran_id).to eq('20090102-111321')
   end
 
   it "should be able to parse google analytics api xml" do
     data = Analytics::Feed.parse(fixture_file('analytics.xml'))
-    data.id.should == 'http://www.google.com/analytics/feeds/accounts/nunemaker@gmail.com'
-    data.entries.size.should == 4
+    expect(data.id).to eq('http://www.google.com/analytics/feeds/accounts/nunemaker@gmail.com')
+    expect(data.entries.size).to eq(4)
 
     entry = data.entries[0]
-    entry.title.should == 'addictedtonew.com'
-    entry.properties.size.should == 4
+    expect(entry.title).to eq('addictedtonew.com')
+    expect(entry.properties.size).to eq(4)
 
     property = entry.properties[0]
-    property.name.should == 'ga:accountId'
-    property.value.should == '85301'
+    expect(property.name).to eq('ga:accountId')
+    expect(property.value).to eq('85301')
   end
 
   it "should be able to parse google analytics profile xml with manually declared namespace" do
     data = Analytics::Profile.parse(fixture_file('analytics_profile.xml'))
-    data.entries.size.should == 6
+    expect(data.entries.size).to eq(6)
 
     entry = data.entries[0]
-    entry.title.should == 'www.homedepot.com'
-    entry.properties.size.should == 6
-    entry.goals.size.should == 0
+    expect(entry.title).to eq('www.homedepot.com')
+    expect(entry.properties.size).to eq(6)
+    expect(entry.goals.size).to eq(0)
   end
 
   it "should allow instantiating with a string" do
@@ -935,43 +935,43 @@ describe HappyMapper do
 
   it "should parse family search xml" do
     tree = FamilySearch::FamilyTree.parse(fixture_file('family_tree.xml'))
-    tree.version.should == '1.0.20071213.942'
-    tree.status_message.should == 'OK'
-    tree.status_code.should == '200'
-    tree.persons.person.size.should == 1
-    tree.persons.person.first.version.should == '1199378491000'
-    tree.persons.person.first.modified.should == Time.utc(2008, 1, 3, 16, 41, 31) # 2008-01-03T09:41:31-07:00
-    tree.persons.person.first.id.should == 'KWQS-BBQ'
-    tree.persons.person.first.information.alternateIds.ids.should_not be_kind_of(String)
-    tree.persons.person.first.information.alternateIds.ids.size.should == 8
+    expect(tree.version).to eq('1.0.20071213.942')
+    expect(tree.status_message).to eq('OK')
+    expect(tree.status_code).to eq('200')
+    expect(tree.persons.person.size).to eq(1)
+    expect(tree.persons.person.first.version).to eq('1199378491000')
+    expect(tree.persons.person.first.modified).to eq(Time.utc(2008, 1, 3, 16, 41, 31)) # 2008-01-03T09:41:31-07:00
+    expect(tree.persons.person.first.id).to eq('KWQS-BBQ')
+    expect(tree.persons.person.first.information.alternateIds.ids).not_to be_kind_of(String)
+    expect(tree.persons.person.first.information.alternateIds.ids.size).to eq(8)
   end
 
   it "should parse multiple images" do
     artist = Artist.parse(fixture_file('multiple_primitives.xml'))
-    artist.name.should == "value"
-    artist.images.size.should == 2
+    expect(artist.name).to eq("value")
+    expect(artist.images.size).to eq(2)
   end
 
   it "should parse lastfm namespaces" do
     l = Location.parse(fixture_file('lastfm.xml'))
-    l.first.latitude.should == "51.53469"
+    expect(l.first.latitude).to eq("51.53469")
   end
 
   describe "Parse optional attributes" do
 
     it "should parse an empty String as empty" do
       a = OptionalAttribute.parse(fixture_file('optional_attributes.xml'))
-      a[0].street.should == ""
+      expect(a[0].street).to eq("")
     end
 
     it "should parse a String with value" do
       a = OptionalAttribute.parse(fixture_file('optional_attributes.xml'))
-      a[1].street.should == "Milchstrasse"
+      expect(a[1].street).to eq("Milchstrasse")
     end
 
     it "should parse a String with value" do
       a = OptionalAttribute.parse(fixture_file('optional_attributes.xml'))
-      a[2].street.should be_nil
+      expect(a[2].street).to be_nil
     end
 
   end
@@ -983,15 +983,15 @@ describe HappyMapper do
     end
 
     it "should parse author" do
-      @book.author.should == "Frank Gilbreth"
+      expect(@book.author).to eq("Frank Gilbreth")
     end
 
     it "should parse title" do
-      @book.title.should == "Cheaper by the Dozen"
+      expect(@book.title).to eq("Cheaper by the Dozen")
     end
 
     it "should parse number" do
-      @book.number.should == "1568491379"
+      expect(@book.number).to eq("1568491379")
     end
 
   end
@@ -1003,42 +1003,45 @@ describe HappyMapper do
     end
 
     it "should parse XmlContent" do
-      @records.first.definitions.first.text.should ==
+      expect(@records.first.definitions.first.text).to eq(
         'a large common parrot, <bn>Cacatua galerita</bn>, predominantly white, with yellow on the undersides of wings and tail and a forward curving yellow crest, found in Australia, New Guinea and nearby islands.'
+      )
     end
 
     it "should save object's xml content" do
-      @records.first.variants.first.xml_content.should ==
+      expect(@records.first.variants.first.xml_content).to eq(
         'white <tag>cockatoo</tag>'
-      @records.first.variants.last.to_html.should ==
+      )
+      expect(@records.first.variants.last.to_html).to eq(
         '<em>white</em> cockatoo'
+      )
     end
   end
 
   it "should parse ambigous items" do
     items = AmbigousItems::Item.parse(fixture_file('ambigous_items.xml'), :xpath => '/ambigous/my-items')
-    items.map(&:name).should == %w(first second third).map{|s| "My #{s} item" }
+    expect(items.map(&:name)).to eq(%w(first second third).map{|s| "My #{s} item" })
   end
 
 
   context Article do
     it "should parse the publish options for Article and Photo" do
-      @article.title.should_not be_nil
-      @article.text.should_not be_nil
-      @article.photos.should_not be_nil
-      @article.photos.first.title.should_not be_nil
+      expect(@article.title).not_to be_nil
+      expect(@article.text).not_to be_nil
+      expect(@article.photos).not_to be_nil
+      expect(@article.photos.first.title).not_to be_nil
     end
 
     it "should parse the publish options for Article" do
-      @article.publish_options.should_not be_nil
+      expect(@article.publish_options).not_to be_nil
     end
 
     it "should parse the publish options for Photo" do
-      @article.photos.first.publish_options.should_not be_nil
+      expect(@article.photos.first.publish_options).not_to be_nil
     end
 
     it "should only find only items at the parent level" do
-      @article.photos.length.should == 1
+      expect(@article.photos.length).to eq(1)
     end
 
     before(:all) do
@@ -1050,11 +1053,11 @@ describe HappyMapper do
   context "Namespace is missing because an optional element that uses it is not present" do
      it "should parse successfully" do
        @article = PartiallyBadArticle.parse(fixture_file('subclass_namespace.xml'))
-       @article.should_not be_nil
-       @article.title.should_not be_nil
-       @article.text.should_not be_nil
-       @article.photos.should_not be_nil
-       @article.photos.first.title.should_not be_nil
+       expect(@article).not_to be_nil
+       expect(@article.title).not_to be_nil
+       expect(@article.text).not_to be_nil
+       expect(@article.photos).not_to be_nil
+       expect(@article.photos.first.title).not_to be_nil
      end
    end
 
@@ -1065,7 +1068,7 @@ describe HappyMapper do
        posts = Post.parse(fixture_file('posts.xml'), :in_groups_of => 6) do |a|
          sizes << a.size
        end
-       sizes.should == [6, 6, 6, 2]
+       expect(sizes).to eq([6, 6, 6, 2])
      end
 
      it "should return results with limited size: 10" do
@@ -1073,7 +1076,7 @@ describe HappyMapper do
        posts = Post.parse(fixture_file('posts.xml'), :in_groups_of => 10) do |a|
          sizes << a.size
        end
-       sizes.should == [10, 10]
+       expect(sizes).to eq([10, 10])
      end
    end
 
@@ -1095,7 +1098,7 @@ describe HappyMapper do
     }
 
     it 'initializes @nokogiri_config_callback to nil' do
-      default.nokogiri_config_callback.should be_nil
+      expect(default.nokogiri_config_callback).to be_nil
     end
 
     it 'defaults to Nokogiri::XML::ParseOptions::STRICT' do
@@ -1103,7 +1106,7 @@ describe HappyMapper do
     end
 
     it 'accepts .on_config callback' do
-      custom.nokogiri_config_callback.should_not be_nil
+      expect(custom.nokogiri_config_callback).not_to be_nil
     end
 
     it 'parses according to @nokogiri_config_callback' do

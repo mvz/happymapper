@@ -76,7 +76,7 @@ describe "Using inheritance to share elements and attributes" do
         expect(subject.love).to eq 99
         expect(subject.genetics.dna).to eq "ABBA"
         expect(subject.naivety).to eq "trusting"
-        expect(subject.immunities).to have(1).item
+        expect(subject.immunities.size).to eq(1)
       end
     end
 
@@ -99,7 +99,7 @@ describe "Using inheritance to share elements and attributes" do
 
       it "saves both the Child and Parent elements" do
         expect(subject.xpath("genetics").text).to eq "GATTACA"
-        expect(subject.xpath("immunities")).to have(3).items
+        expect(subject.xpath("immunities").size).to eq(3)
       end
     end
 

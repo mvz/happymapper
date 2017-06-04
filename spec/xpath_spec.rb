@@ -65,19 +65,19 @@ describe "Specifying elements and attributes with an xpath" do
   end
 
   it "should find the subitems based on the xpath" do
-    expect(subject.more_details_text).to have(2).items
+    expect(subject.more_details_text.size).to eq(2)
     expect(subject.more_details_text.first).to eq  "more 1"
     expect(subject.more_details_text.last).to eq "more 2"
   end
 
   it "should find the subitems based on the xpath" do
-    expect(subject.more_details).to have(2).items
+    expect(subject.more_details.size).to eq(2)
     expect(subject.more_details.first).to eq "this one"
     expect(subject.more_details.last).to eq "another one"
   end
 
   it "should find the subitems based on the xpath" do
-    expect(subject.more_details_alternative).to have(2).items
+    expect(subject.more_details_alternative.size).to eq(2)
     expect(subject.more_details_alternative.first).to eq "this one"
     expect(subject.more_details_alternative.last).to eq "another one"
   end

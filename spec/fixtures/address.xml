@@ -5,5 +5,8 @@
   <postcode>26131</postcode>
   <city>Oldenburg</city>
   <country code="de">Germany</country>
+  <mobilePhone operatorName='vodafone'>89473928231</mobilePhone>
+  <homeOwner>Albert</homeOwner>
+  <homeOwner>Mayer</homeOwner>
   <state>Lower Saxony</state>
 </address>

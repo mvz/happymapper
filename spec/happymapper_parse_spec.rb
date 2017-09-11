@@ -15,6 +15,16 @@ describe HappyMapper do
         expect(subject.city).to eq("Oldenburg")
       end
 
+      it "should parse camelCased elements" do
+        subject.mobile_phone.content.should == '89473928231'
+      end
+
+      it "should recognize several camelCased elements as has_many relationship" do
+        subject.home_owner.size.should == 2
+        subject.home_owner.first == 'Albert'
+        subject.home_owner.last == 'Mayer'
+      end
+
       it "should not create a content entry when the xml contents no text content" do
         expect(subject).not_to respond_to :content
       end
@@ -23,6 +33,10 @@ describe HappyMapper do
 
         it "should parse the attributes" do
           expect(subject.country.code).to eq("de")
+        end
+
+        it "should parse camelCased attributes" do
+          subject.mobile_phone.operator_name.should == "vodafone"
         end
 
         it "should parse the content" do

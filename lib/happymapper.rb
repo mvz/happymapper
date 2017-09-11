@@ -592,7 +592,7 @@ module HappyMapper
       #
       if self.class.instance_variable_get('@registered_namespaces') && builder.doc.root
         self.class.instance_variable_get('@registered_namespaces').each_pair do |name,href|
-          name = nil if name == "xmlns"
+          name = nil if name == "xmlns" || name == DEFAULT_NS
           builder.doc.root.add_namespace(name,href)
         end
       end
@@ -712,7 +712,7 @@ module HappyMapper
               #
               # When a value exists we should append the value for the tag
               #
-              if item_namespace
+              if item_namespace && item_namespace != DEFAULT_NS
                 xml[item_namespace].send("#{tag}_",item.to_s)
               else
                 xml.send("#{tag}_",item.to_s)

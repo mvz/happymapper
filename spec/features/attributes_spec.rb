@@ -7,6 +7,7 @@ module AttributeMethodConversion
     include HappyMapper
 
     has_many :link, String, attributes: { 'data-src': String, type: String, href: String }
+    has_one :class, String
   end
 end
 

@@ -7,6 +7,9 @@ require 'happymapper/version'
 require 'happymapper/anonymous_mapper'
 
 module HappyMapper
+  # Necessary to support elements/attributes named 'class'.
+  alias __class__ class
+
   class Boolean; end
   class XmlContent; end
 
@@ -251,11 +254,11 @@ module HappyMapper
       passthrus.each do |item|
         class_eval <<-RUBY, __FILE__, __LINE__ + 1
           def #{item.method_name}
-            @#{name} ||= self.class.instance_variable_get('@wrapper_anonymous_classes')['#{wrapper_key}'].new
+            @#{name} ||= __class__.instance_variable_get('@wrapper_anonymous_classes')['#{wrapper_key}'].new
             @#{name}.#{item.method_name}
           end
           def #{item.method_name}=(value)
-            @#{name} ||= self.class.instance_variable_get('@wrapper_anonymous_classes')['#{wrapper_key}'].new
+            @#{name} ||= __class__.instance_variable_get('@wrapper_anonymous_classes')['#{wrapper_key}'].new
             @#{name}.#{item.method_name} = value
           end
         RUBY
@@ -475,7 +478,7 @@ module HappyMapper
 
       # Call any registered after_parse callbacks for the object's class
 
-      obj.class.after_parse_callbacks.each { |callback| callback.call(obj) }
+      obj.__class__.after_parse_callbacks.each { |callback| callback.call(obj) }
 
       # collect the object that we have created
 
@@ -486,7 +489,7 @@ module HappyMapper
   # Set all attributes with a default to their default values
   def initialize
     super
-    self.class.attributes.reject { |attr| attr.default.nil? }.each do |attr|
+    __class__.attributes.reject { |attr| attr.default.nil? }.each do |attr|
       send("#{attr.method_name}=", attr.default)
     end
   end
@@ -537,14 +540,14 @@ module HappyMapper
     # When neither are specifed we are simply using whatever is default to the
     # builder
     #
-    namespace_name = namespace_override || self.class.namespace || default_namespace
+    namespace_name = namespace_override || __class__.namespace || default_namespace
 
     #
     # Create a tag in the builder that matches the class's tag name unless a tag was passed
     # in a recursive call from the parent doc.  Then append
     # any attributes to the element that were defined above.
     #
-    builder.send("#{tag_from_parent || self.class.tag_name}_", attributes) do |xml|
+    builder.send("#{tag_from_parent || __class__.tag_name}_", attributes) do |xml|
       register_namespaces_with_builder(builder)
 
       xml.parent.namespace =
@@ -554,7 +557,7 @@ module HappyMapper
       # When a content has been defined we add the resulting value
       # the output xml
       #
-      if (content = self.class.defined_content)
+      if (content = __class__.defined_content)
 
         unless content.options[:read_only]
           value = send(content.name)
@@ -569,7 +572,7 @@ module HappyMapper
       # for every define element (i.e. has_one, has_many, element) we are
       # going to persist each one
       #
-      self.class.elements.each do |element|
+      __class__.elements.each do |element|
         element_to_xml(element, xml, default_namespace)
       end
     end
@@ -589,7 +592,7 @@ module HappyMapper
   #
   # Params and return are the same as the class parse() method above.
   def parse(xml, options = {})
-    self.class.parse(xml, options.merge!(update: self))
+    __class__.parse(xml, options.merge!(update: self))
   end
 
   # Factory for creating anonmyous HappyMappers
@@ -630,7 +633,7 @@ module HappyMapper
     # Find the attributes for the class and collect them into an array
     # that will be placed into a Hash structure
     #
-    attributes = self.class.attributes.collect do |attribute|
+    attributes = __class__.attributes.collect do |attribute|
       #
       # If an attribute is marked as read_only then we want to ignore the attribute
       # when it comes to saving the xml document; so we will not go into any of
@@ -674,9 +677,9 @@ module HappyMapper
   # which means that it is the default namespace of the code.
   #
   def register_namespaces_with_builder(builder)
-    return unless self.class.instance_variable_get('@registered_namespaces')
+    return unless __class__.instance_variable_get('@registered_namespaces')
 
-    self.class.instance_variable_get('@registered_namespaces').sort.each do |name, href|
+    __class__.instance_variable_get('@registered_namespaces').sort.each do |name, href|
       name = nil if name == 'xmlns'
       builder.doc.root.add_namespace(name, href)
     end
@@ -722,13 +725,13 @@ module HappyMapper
         # process should have their contents retrieved and attached
         # to the builder structure
         #
-        item.to_xml(xml, self.class.namespace || default_namespace,
+        item.to_xml(xml, __class__.namespace || default_namespace,
                     element.options[:namespace],
                     element.options[:tag] || nil)
 
       elsif !item.nil?
 
-        item_namespace = element.options[:namespace] || self.class.namespace || default_namespace
+        item_namespace = element.options[:namespace] || __class__.namespace || default_namespace
 
         #
         # When a value exists we should append the value for the tag

@@ -726,26 +726,19 @@ module HappyMapper
                     element.options[:namespace],
                     element.options[:tag] || nil)
 
-      elsif !item.nil?
+      elsif !item.nil? || element.options[:state_when_nil]
 
         item_namespace = element.options[:namespace] || self.class.namespace || default_namespace
 
         #
-        # When a value exists we should append the value for the tag
+        # When a value exists or the tag should always be emitted, 
+        # we should append the value for the tag
         #
         if item_namespace
           xml[item_namespace].send("#{tag}_", item.to_s)
         else
           xml.send("#{tag}_", item.to_s)
         end
-
-      elsif element.options[:state_when_nil]
-
-        #
-        # Normally a nil value would be ignored, however if specified then
-        # an empty element will be written to the xml
-        #
-        xml.send("#{tag}_", '')
       end
     end
   end

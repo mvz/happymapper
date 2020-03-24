@@ -652,7 +652,7 @@ module HappyMapper
         # Attributes that have a nil value should be ignored unless they explicitly
         # state that they should be expressed in the output.
         #
-        if !(value.nil? || attribute.options[:state_when_nil])
+        if !value.nil? || attribute.options[:state_when_nil]
           attribute_namespace = attribute.options[:namespace]
           ["#{attribute_namespace ? "#{attribute_namespace}:" : ''}#{attribute.tag}", value]
         else

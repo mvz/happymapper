@@ -641,7 +641,6 @@ module HappyMapper
       else
 
         value = send(attribute.method_name)
-        value = nil if value == attribute.default
 
         #
         # Apply any on_save lambda/proc or value defined on the attribute.

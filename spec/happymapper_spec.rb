@@ -1208,4 +1208,12 @@ describe HappyMapper do
       end
     end
   end
+
+  context 'encoding' do
+    it 'allows passing :encoding option to fix special characters when parsing xml' do
+      xml = %(<address><street>Milchstrasse ÄÖÜ</street><housenumber>23</housenumber></address>)
+      address = Address.parse(xml, encoding: 'UTF-8')
+      expect(address.street).to eq('Milchstrasse ÄÖÜ')
+    end
+  end
 end

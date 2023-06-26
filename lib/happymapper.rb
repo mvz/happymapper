@@ -294,6 +294,7 @@ module HappyMapper
     #     to retuning an array of multiple items.
     #     :xpath information where to start the parsing
     #     :namespace is the namespace to use for additional information.
+    #     :encoding explicitly set the encoding to Nokogiri::XML document
     #
     def parse(xml, options = {})
       # Capture any provided namespaces and merge in any namespaces that have
@@ -309,8 +310,9 @@ module HappyMapper
         unless xml.is_a?(Nokogiri::XML::Document)
           # Attempt to parse the xml value with Nokogiri XML as a document
           # and select the root element
+          encoding = options[:encoding]
           xml = Nokogiri::XML(
-            xml, nil, nil,
+            xml, nil, encoding,
             Nokogiri::XML::ParseOptions::STRICT,
             &nokogiri_config_callback
           )

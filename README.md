@@ -166,6 +166,13 @@ address = Address.parse(ADDRESS_XML_DATA, single: true)
 The first one returns an array and we return the first instance, the second
 will do that work for us inside of parse.
 
+#### Encoding
+Encoding can be passed as an option to a `parse` to explicitly set the encoding to an XML.
+
+```ruby
+address = Address.parse(ADDRESS_XML_DATA, single: true, encoding: 'UTF-8')
+```
+
 ### Multiple Elements Mapping
 
 What if our address XML was a little different, perhaps we allowed multiple

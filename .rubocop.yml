@@ -49,6 +49,10 @@ Naming/PredicateName:
     - 'has_many'
     - 'has_xml_content'
 
+# Disabled because RSpec/SpecFilePathFormat is automatically enabled as a new cop
+RSpec/FilePath:
+  Enabled: false
+
 RSpec/SpecFilePathFormat:
   CustomTransform:
     HappyMapper: 'happymapper'

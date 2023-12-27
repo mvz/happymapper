@@ -63,7 +63,7 @@ module ToXMLWithNamespaces
 
     def initialize(parameters)
       parameters.each_pair do |property, value|
-        send("#{property}=", value) if respond_to?("#{property}=")
+        send(:"#{property}=", value) if respond_to?(:"#{property}=")
       end
     end
   end
@@ -84,7 +84,7 @@ module ToXMLWithNamespaces
 
     def initialize(parameters)
       parameters.each_pair do |property, value|
-        send("#{property}=", value) if respond_to?("#{property}=")
+        send(:"#{property}=", value) if respond_to?(:"#{property}=")
       end
     end
   end
@@ -107,7 +107,7 @@ module ToXMLWithNamespaces
 
     def initialize(parameters)
       parameters.each_pair do |property, value|
-        send("#{property}=", value) if respond_to?("#{property}=")
+        send(:"#{property}=", value) if respond_to?(:"#{property}=")
       end
     end
   end

@@ -44,7 +44,7 @@ module HappyMapper
   def initialize
     super
     self.class.attributes.reject { |attr| attr.default.nil? }.each do |attr|
-      send("#{attr.method_name}=", attr.default)
+      send(:"#{attr.method_name}=", attr.default)
     end
   end
 
@@ -103,7 +103,7 @@ module HappyMapper
     #
 
     tag_name = tag_from_parent || self.class.tag_name
-    builder.send("#{tag_name}_", attributes) do |xml|
+    builder.send(:"#{tag_name}_", attributes) do |xml|
       register_namespaces_with_builder(builder)
 
       xml.parent.namespace =
@@ -287,9 +287,9 @@ module HappyMapper
         # we should append the value for the tag
         #
         if item_namespace
-          xml[item_namespace].send("#{tag}_", item.to_s)
+          xml[item_namespace].send(:"#{tag}_", item.to_s)
         else
-          xml.send("#{tag}_", item.to_s)
+          xml.send(:"#{tag}_", item.to_s)
         end
       end
     end

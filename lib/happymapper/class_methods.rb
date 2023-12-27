@@ -425,15 +425,15 @@ module HappyMapper
       attributes.each do |attr|
         value = attr.from_xml_node(node, namespace, namespaces)
         value = attr.default if value.nil?
-        obj.send("#{attr.method_name}=", value)
+        obj.send(:"#{attr.method_name}=", value)
       end
 
       elements.each do |elem|
-        obj.send("#{elem.method_name}=", elem.from_xml_node(node, namespace, namespaces))
+        obj.send(:"#{elem.method_name}=", elem.from_xml_node(node, namespace, namespaces))
       end
 
       if (content = defined_content)
-        obj.send("#{content.method_name}=",
+        obj.send(:"#{content.method_name}=",
                  content.from_xml_node(node, namespace, namespaces))
       end
 

@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.10.0 / 2024-01-05
+
+* Fix typo in README code sample ([#198] by [Spone])
+* Improve custom parser option ([#219] by [dmke])
+* Force namespace to be specified separately from tag ([#222] by [mvz])
+* Pass options into wrapping element ([#225] by [jbennett])
+* Support Ruby 3.0 through 3.3 and JRuby 9.4, dropping support for Ruby 2.6 and 2.7
+  ([#209], [#210], [#211] and [#230] by [mvz])
+
+[Spone]: https://github.com/Spone
+[dmke]: https://github.com/dmke
+[jbennett]: https://github.com/jbennett
+[mvz]: https://github.com/mvz
+
+[#198]: https://github.com/mvz/happymapper/pull/198
+[#209]: https://github.com/mvz/happymapper/pull/209
+[#210]: https://github.com/mvz/happymapper/pull/210
+[#211]: https://github.com/mvz/happymapper/pull/211
+[#219]: https://github.com/mvz/happymapper/pull/219
+[#222]: https://github.com/mvz/happymapper/pull/222
+[#225]: https://github.com/mvz/happymapper/pull/225
+[#230]: https://github.com/mvz/happymapper/pull/230
+
 ## 0.9.0 / 2022-01-21
 
 * Add official support for Ruby 2.7, 3.0 and 3.1

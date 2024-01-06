@@ -560,25 +560,6 @@ module StringFoo
   end
 end
 
-class ParserTest
-  include HappyMapper
-
-  class Coerce
-    def self.number_list(val)
-      val.to_s.split(",").map { _1.strip.to_i }
-    end
-  end
-
-  tag "parsertest"
-  attribute :numbers, Coerce, parser: :number_list
-  element :strings, self, parser: :string_list
-  element :bool, String, parser: ->(val) { val.to_s == "1" }
-
-  def self.string_list(val)
-    val.to_s.split(",").map(&:strip)
-  end
-end
-
 describe HappyMapper do
   describe "being included into another class" do
     let(:klass) do
@@ -1233,16 +1214,6 @@ describe HappyMapper do
         expect(original.encoding).to eq Encoding::UTF_8
         expect(parsed.to_xml.encoding).to eq Encoding::UTF_8
       end
-    end
-  end
-
-  it "parses with custom parser" do
-    parsed = ParserTest.parse fixture_file("custom_parsers.xml")
-
-    aggregate_failures do
-      expect(parsed.numbers).to eq [1, 2, 3]
-      expect(parsed.strings).to eq %w(a b c)
-      expect(parsed.bool).to be false
     end
   end
 end

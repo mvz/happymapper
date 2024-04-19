@@ -18,6 +18,16 @@ module MixedNamespaces
     has_one :postcode, String, namespace: "different"
     has_one :city, String, namespace: nil
   end
+
+  class RootCollision
+    include HappyMapper
+
+    register_namespace "xmlns", "http://www.unicornland.com/prefix"
+
+    tag :address
+
+    has_many :streets, String, tag: "street"
+  end
 end
 
 RSpec.describe "A document with mixed namespaces" do
@@ -58,5 +68,37 @@ RSpec.describe "A document with mixed namespaces" do
 
   it "city" do
     expect(address.city).to eq "Oldenburg"
+  end
+
+  describe "and xmlns prefix collisions" do
+    # Nokogiri calls out a potential problem with Nokogiri::Document.collect_namespaces
+    # if the XML document has duplicate prefixes with different namespaces.
+    # This document triggers the problem - the `xmlns` namespace will be overwritten
+    # with the `http://override.com/breaks` value, so the root node won't be found.
+    # The failure manifests as `nil` being returned from .parse.
+    let(:collision_document) do
+      <<~XML
+        <?xml version="1.0" encoding="UTF-8"?>
+        <address location='home' xmlns="http://www.unicornland.com/prefix"
+          xmlns:override="http://override.com/breaks">
+          <street>Milchstrasse</street>
+          <street>Another Street</street>
+          <housenumber xmlns="http://override.com/breaks">23</housenumber>
+          <housenumber xmlns="http://override.com/breaks">55</housenumber>
+          <housenumber xmlns="http://override.com/breaks">88</housenumber>
+          <different:postcode>26131</different:postcode>
+          <different:city>Oldenburg</different:city>
+          <housenumber xmlns="http://override.com/breaks">99</housenumber>
+        </address>
+      XML
+    end
+
+    let(:root_collision) do
+      MixedNamespaces::RootCollision.parse(collision_document)
+    end
+
+    it "has the correct streets" do
+      expect(root_collision.streets).to eq ["Milchstrasse", "Another Street"]
+    end
   end
 end

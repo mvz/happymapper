@@ -289,7 +289,7 @@ module HappyMapper
         node = xml.root
 
         # merge any namespaces found on the xml node into the namespace hash
-        namespaces = namespaces.merge(xml.collect_namespaces)
+        namespaces = namespaces.merge(xml.collect_namespaces).merge(node.namespaces)
 
         # if the node name is equal to the tag name then the we are parsing the
         # root element and that is important to record so that we can apply

@@ -80,7 +80,8 @@ RSpec.describe "A document with mixed namespaces" do
       <<~XML
         <?xml version="1.0" encoding="UTF-8"?>
         <address location='home' xmlns="http://www.unicornland.com/prefix"
-          xmlns:override="http://override.com/breaks">
+          xmlns:override="http://override.com/breaks"
+          xmlns:different="http://www.trollcountry.com/different">
           <street>Milchstrasse</street>
           <street>Another Street</street>
           <housenumber xmlns="http://override.com/breaks">23</housenumber>

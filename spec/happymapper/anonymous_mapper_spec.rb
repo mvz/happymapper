@@ -36,7 +36,7 @@ RSpec.describe HappyMapper::AnonymousMapper do
     end
 
     context "with element names with special characters" do
-      let(:parsed_result) { anonymous_mapper.parse fixture_file("ambigous_items.xml") }
+      let(:parsed_result) { anonymous_mapper.parse fixture_file("ambiguous_items.xml") }
 
       it "creates accessor methods with similar names" do
         expect(parsed_result.my_items.item).to be_a Array
@@ -87,7 +87,7 @@ RSpec.describe HappyMapper::AnonymousMapper do
     end
 
     context "with several elements nested deeply" do
-      let(:parsed_result) { anonymous_mapper.parse fixture_file("ambigous_items.xml") }
+      let(:parsed_result) { anonymous_mapper.parse fixture_file("ambiguous_items.xml") }
 
       it "parses the entire relationship" do
         expect(parsed_result.my_items.item.first.item.name).to eq("My first internal item")

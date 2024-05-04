@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ambigous>
+<ambiguous>
   <my-items>
     <item>
       <name>My first item</name>
@@ -19,4 +19,4 @@
       <name>Other item</name>
     </item>
   </others-items>
-</ambigous>
+</ambiguous>

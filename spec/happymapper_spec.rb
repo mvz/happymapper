@@ -434,7 +434,7 @@ module Dictionary
   end
 end
 
-module AmbigousItems
+module AmbiguousItems
   class Item
     include HappyMapper
 
@@ -1082,9 +1082,9 @@ describe HappyMapper do
     end
   end
 
-  it "parses ambigous items" do
-    items = AmbigousItems::Item.parse(fixture_file("ambigous_items.xml"),
-                                      xpath: "/ambigous/my-items")
+  it "parses ambiguous items" do
+    items = AmbiguousItems::Item.parse(fixture_file("ambiguous_items.xml"),
+                                       xpath: "/ambiguous/my-items")
     expect(items.map(&:name)).to eq(%w(first second third).map { |s| "My #{s} item" })
   end
 

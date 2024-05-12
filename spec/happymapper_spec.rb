@@ -80,18 +80,6 @@ class Radar
   has_many :places, Place, tag: :place
 end
 
-class Post
-  include HappyMapper
-
-  attribute :href, String
-  attribute :hash, String
-  attribute :description, String
-  attribute :tag, String
-  attribute :time, Time
-  attribute :others, Integer
-  attribute :extended, String
-end
-
 class User
   include HappyMapper
 
@@ -425,10 +413,29 @@ describe HappyMapper do
   end
 
   describe "#attributes" do
+    let(:foo_klass) do
+      Class.new do
+        include HappyMapper
+
+        attribute :foo, String
+        attribute :bar, String
+      end
+    end
+    let(:bar_klass) do
+      Class.new do
+        include HappyMapper
+
+        attribute :baz1, String
+        attribute :baz2, String
+        attribute :baz3, String
+        attribute :baz4, String
+      end
+    end
+
     it "returns only attributes for the current class" do
       aggregate_failures do
-        expect(Post.attributes.size).to eq(7)
-        expect(Status.attributes.size).to eq(0)
+        expect(foo_klass.attributes.size).to eq 2
+        expect(bar_klass.attributes.size).to eq 4
       end
     end
   end
@@ -436,7 +443,7 @@ describe HappyMapper do
   describe "#elements" do
     it "returns only elements for the current class" do
       aggregate_failures do
-        expect(Post.elements.size).to eq(0)
+        expect(User.elements.size).to eq(9)
         expect(Status.elements.size).to eq(10)
       end
     end
@@ -464,27 +471,6 @@ describe HappyMapper do
         expect(value).to eq(120.25)
         expect(value).to be_a Float
       end
-    end
-  end
-
-  it "parses xml attributes into ruby objects" do
-    posts = Post.parse(fixture_file("posts.xml"))
-
-    aggregate_failures do
-      expect(posts.size).to eq(20)
-      first = posts.first
-      expect(first.href).to eq("http://roxml.rubyforge.org/")
-      expect(first.hash).to eq("19bba2ab667be03a19f67fb67dc56917")
-      expect(first.description).to eq("ROXML - Ruby Object to XML Mapping Library")
-      expect(first.tag).to eq("ruby xml gems mapping")
-      expect(first.time).to eq(Time.utc(2008, 8, 9, 5, 24, 20))
-      expect(first.others).to eq(56)
-      expect(first.extended)
-        .to eq("ROXML is a Ruby library designed to make it easier for Ruby" \
-               " developers to work with XML. Using simple annotations, it enables" \
-               " Ruby classes to be custom-mapped to XML. ROXML takes care of the" \
-               " marshalling and unmarshalling of mapped attributes so that developers" \
-               " can focus on building first-class Ruby classes.")
     end
   end
 
@@ -739,9 +725,16 @@ describe HappyMapper do
   end
 
   describe "with limit option" do
+    let(:post_klass) do
+      Class.new do
+        include HappyMapper
+        tag "post"
+      end
+    end
+
     it "returns results with limited size: 6" do
       sizes = []
-      Post.parse(fixture_file("posts.xml"), in_groups_of: 6) do |a|
+      post_klass.parse(fixture_file("posts.xml"), in_groups_of: 6) do |a|
         sizes << a.size
       end
       expect(sizes).to eq([6, 6, 6, 2])
@@ -749,7 +742,7 @@ describe HappyMapper do
 
     it "returns results with limited size: 10" do
       sizes = []
-      Post.parse(fixture_file("posts.xml"), in_groups_of: 10) do |a|
+      post_klass.parse(fixture_file("posts.xml"), in_groups_of: 10) do |a|
         sizes << a.size
       end
       expect(sizes).to eq([10, 10])

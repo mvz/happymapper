@@ -49,6 +49,11 @@ Naming/PredicateName:
     - 'has_many'
     - 'has_xml_content'
 
+# regression specs do not describe classes
+RSpec/DescribeClass:
+  Exclude:
+    - 'spec/regressions/*.rb'
+
 # Disabled because RSpec/SpecFilePathFormat is automatically enabled as a new cop
 RSpec/FilePath:
   Enabled: false

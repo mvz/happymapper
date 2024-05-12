@@ -2,43 +2,49 @@
 
 require "spec_helper"
 
-class CatalogTree
-  include HappyMapper
+RSpec.describe "parsing a VOD catalog" do
+  before do
+    catalog_tree = Class.new do
+      include HappyMapper
 
-  tag "CatalogTree"
-  register_namespace "xmlns", "urn:eventis:prodis:onlineapi:1.0"
-  register_namespace "xsi", "http://www.w3.org/2001/XMLSchema-instance"
-  register_namespace "xsd", "http://www.w3.org/2001/XMLSchema"
+      tag "CatalogTree"
+      register_namespace "xmlns", "urn:eventis:prodis:onlineapi:1.0"
+      register_namespace "xsi", "http://www.w3.org/2001/XMLSchema-instance"
+      register_namespace "xsd", "http://www.w3.org/2001/XMLSchema"
 
-  attribute :code, String
+      attribute :code, String
 
-  has_many :nodes, "CatalogNode", tag: "Node", xpath: "."
-end
+      has_many :nodes, "CatalogNode", tag: "Node", xpath: "."
+    end
+    stub_const "CatalogTree", catalog_tree
 
-class CatalogNode
-  include HappyMapper
+    catalog_node = Class.new do
+      include HappyMapper
 
-  tag "Node"
+      tag "Node"
 
-  attribute :back_office_id, String, tag: "vodBackOfficeId"
+      attribute :back_office_id, String, tag: "vodBackOfficeId"
 
-  has_one :name, String, tag: "Name"
-  # other important fields
+      has_one :name, String, tag: "Name"
+      # other important fields
 
-  has_many :translations, "CatalogNode::Translations", tag: "Translation", xpath: "child::*"
+      has_many :translations, "CatalogNode::Translations", tag: "Translation",
+                                                           xpath: "child::*"
 
-  class Translations
-    include HappyMapper
-    tag "Translation"
+      has_many :nodes, self, tag: "Node", xpath: "child::*"
+    end
+    stub_const "CatalogNode", catalog_node
 
-    attribute :language, String, tag: "Language"
-    has_one :name, String, tag: "Name"
+    translations = Class.new do
+      include HappyMapper
+      tag "Translation"
+
+      attribute :language, String, tag: "Language"
+      has_one :name, String, tag: "Name"
+    end
+    stub_const "CatalogNode::Translations", translations
   end
 
-  has_many :nodes, CatalogNode, tag: "Node", xpath: "child::*"
-end
-
-RSpec.describe "parsing a VOD catalog" do
   let(:catalog_tree) { CatalogTree.parse(fixture_file("inagy.xml"), single: true) }
 
   it "is not nil" do

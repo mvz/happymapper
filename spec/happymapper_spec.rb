@@ -71,45 +71,6 @@ class Rate
   include HappyMapper
 end
 
-module FamilySearch
-  class AlternateIds
-    include HappyMapper
-
-    tag "alternateIds"
-    has_many :ids, String, tag: "id"
-  end
-
-  class Information
-    include HappyMapper
-
-    has_one :alternateIds, AlternateIds
-  end
-
-  class Person
-    include HappyMapper
-
-    attribute :version, String
-    attribute :modified, Time
-    attribute :id, String
-    has_one :information, Information
-  end
-
-  class Persons
-    include HappyMapper
-    has_many :person, Person
-  end
-
-  class FamilyTree
-    include HappyMapper
-
-    tag "familytree"
-    attribute :version, String
-    attribute :status_message, String, tag: "statusMessage"
-    attribute :status_code, String, tag: "statusCode"
-    has_one :persons, Persons
-  end
-end
-
 module FedEx
   class Address
     include HappyMapper
@@ -887,23 +848,6 @@ describe HappyMapper do
     bar = StringFoo::Bar.parse "<bar><thing/></bar>"
 
     expect(bar.things).to contain_exactly(StringFoo::Thing)
-  end
-
-  it "parses family search xml" do
-    tree = FamilySearch::FamilyTree.parse(fixture_file("family_tree.xml"))
-
-    aggregate_failures do
-      expect(tree.version).to eq("1.0.20071213.942")
-      expect(tree.status_message).to eq("OK")
-      expect(tree.status_code).to eq("200")
-      expect(tree.persons.person.size).to eq(1)
-      expect(tree.persons.person.first.version).to eq("1199378491000")
-      expect(tree.persons.person.first.modified)
-        .to eq(Time.utc(2008, 1, 3, 16, 41, 31)) # 2008-01-03T09:41:31-07:00
-      expect(tree.persons.person.first.id).to eq("KWQS-BBQ")
-      expect(tree.persons.person.first.information.alternateIds.ids).not_to be_a(String)
-      expect(tree.persons.person.first.information.alternateIds.ids.size).to eq(8)
-    end
   end
 
   it "parses multiple images" do

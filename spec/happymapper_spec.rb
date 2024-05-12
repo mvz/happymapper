@@ -1,91 +1,6 @@
 # frozen_string_literal: true
 
 require "spec_helper"
-require "uri"
-
-module Analytics
-  class Property
-    include HappyMapper
-
-    tag "property"
-    namespace "dxp"
-    attribute :name, String
-    attribute :value, String
-  end
-
-  class Goal
-    include HappyMapper
-
-    # Google Analytics does a dirtry trick where a user with no goals
-    # returns a profile without any goals data or the declared namespace
-    # which means Nokogiri does not pick up the namespace automatically.
-    # To fix this, we manually register the namespace to avoid bad XPath
-    # expression. Dirty, but works.
-
-    register_namespace "ga", "http://schemas.google.com/ga/2009"
-    namespace "ga"
-
-    tag "goal"
-    attribute :active, Boolean
-    attribute :name, String
-    attribute :number, Integer
-    attribute :value, Float
-
-    def clean_name
-      name.gsub("ga:", "")
-    end
-  end
-
-  class Profile
-    include HappyMapper
-
-    tag "entry"
-    element :title, String
-    element :tableId, String, namespace: "dxp"
-
-    has_many :properties, Property
-    has_many :goals, Goal
-  end
-
-  class Entry
-    include HappyMapper
-
-    tag "entry"
-    element :id, String
-    element :updated, DateTime
-    element :title, String
-    element :table_id, String, namespace: "dxp", tag: "tableId"
-    has_many :properties, Property
-  end
-
-  class Feed
-    include HappyMapper
-
-    tag "feed"
-    element :id, String
-    element :updated, DateTime
-    element :title, String
-    has_many :entries, Entry
-  end
-end
-
-module Atom
-  class Feed
-    include HappyMapper
-    tag "feed"
-
-    attribute :xmlns, String, single: true
-    element :id, String, single: true
-    element :title, String, single: true
-    element :updated, DateTime, single: true
-    element :link, String, single: false, attributes: {
-      rel: String,
-      type: String,
-      href: String
-    }
-    # has_many :entries, Entry # nothing interesting in the entries
-  end
-end
 
 class Country
   include HappyMapper
@@ -137,126 +52,6 @@ class Rate
   include HappyMapper
 end
 
-module FamilySearch
-  class AlternateIds
-    include HappyMapper
-
-    tag "alternateIds"
-    has_many :ids, String, tag: "id"
-  end
-
-  class Information
-    include HappyMapper
-
-    has_one :alternateIds, AlternateIds
-  end
-
-  class Person
-    include HappyMapper
-
-    attribute :version, String
-    attribute :modified, Time
-    attribute :id, String
-    has_one :information, Information
-  end
-
-  class Persons
-    include HappyMapper
-    has_many :person, Person
-  end
-
-  class FamilyTree
-    include HappyMapper
-
-    tag "familytree"
-    attribute :version, String
-    attribute :status_message, String, tag: "statusMessage"
-    attribute :status_code, String, tag: "statusCode"
-    has_one :persons, Persons
-  end
-end
-
-module FedEx
-  class Address
-    include HappyMapper
-
-    tag "Address"
-    namespace "v2"
-    element :city, String, tag: "City"
-    element :state, String, tag: "StateOrProvinceCode"
-    element :zip, String, tag: "PostalCode"
-    element :countrycode, String, tag: "CountryCode"
-    element :residential, Boolean, tag: "Residential"
-  end
-
-  class Event
-    include HappyMapper
-
-    tag "Events"
-    namespace "v2"
-    element :timestamp, String, tag: "Timestamp"
-    element :eventtype, String, tag: "EventType"
-    element :eventdescription, String, tag: "EventDescription"
-    has_one :address, Address
-  end
-
-  class PackageWeight
-    include HappyMapper
-
-    tag "PackageWeight"
-    namespace "v2"
-    element :units, String, tag: "Units"
-    element :value, Integer, tag: "Value"
-  end
-
-  class TrackDetails
-    include HappyMapper
-
-    tag "TrackDetails"
-    namespace "v2"
-    element   :tracking_number, String, tag: "TrackingNumber"
-    element   :status_code, String, tag: "StatusCode"
-    element   :status_desc, String, tag: "StatusDescription"
-    element   :carrier_code, String, tag: "CarrierCode"
-    element   :service_info, String, tag: "ServiceInfo"
-    has_one   :weight, PackageWeight, tag: "PackageWeight"
-    element   :est_delivery, String, tag: "EstimatedDeliveryTimestamp"
-    has_many  :events, Event
-  end
-
-  class Notification
-    include HappyMapper
-
-    tag "Notifications"
-    namespace "v2"
-    element :severity, String, tag: "Severity"
-    element :source, String, tag: "Source"
-    element :code, Integer, tag: "Code"
-    element :message, String, tag: "Message"
-    element :localized_message, String, tag: "LocalizedMessage"
-  end
-
-  class TransactionDetail
-    include HappyMapper
-
-    tag "TransactionDetail"
-    namespace "v2"
-    element :cust_tran_id, String, tag: "CustomerTransactionId"
-  end
-
-  class TrackReply
-    include HappyMapper
-
-    tag "TrackReply"
-    namespace "v2"
-    element   :highest_severity, String, tag: "HighestSeverity"
-    element   :more_data, Boolean, tag: "MoreData"
-    has_many  :notifications, Notification, tag: "Notifications"
-    has_many  :trackdetails, TrackDetails, tag: "TrackDetails"
-    has_one   :tran_detail, TransactionDetail, tab: "TransactionDetail"
-  end
-end
-
 class Place
   include HappyMapper
   element :name, String
@@ -265,98 +60,6 @@ end
 class Radar
   include HappyMapper
   has_many :places, Place, tag: :place
-end
-
-class Post
-  include HappyMapper
-
-  attribute :href, String
-  attribute :hash, String
-  attribute :description, String
-  attribute :tag, String
-  attribute :time, Time
-  attribute :others, Integer
-  attribute :extended, String
-end
-
-class User
-  include HappyMapper
-
-  element :id, Integer
-  element :name, String
-  element :screen_name, String
-  element :location, String
-  element :description, String
-  element :profile_image_url, String
-  element :url, String
-  element :protected, Boolean
-  element :followers_count, Integer
-end
-
-class Status
-  include HappyMapper
-
-  register_namespace "fake", "faka:namespace"
-
-  element :id, Integer
-  element :text, String
-  element :created_at, Time
-  element :source, String
-  element :truncated, Boolean
-  element :in_reply_to_status_id, Integer
-  element :in_reply_to_user_id, Integer
-  element :favorited, Boolean
-  element :non_existent, String, tag: "dummy", namespace: "fake"
-  has_one :user, User
-end
-
-class CurrentWeather
-  include HappyMapper
-
-  tag "ob"
-  namespace "aws"
-  element :temperature, Integer, tag: "temp"
-  element :feels_like, Integer, tag: "feels-like"
-  element :current_condition, String, tag: "current-condition", attributes: { icon: String }
-end
-
-# for type coercion
-class ProductGroup < String; end
-
-module PITA
-  class Item
-    include HappyMapper
-
-    tag "Item" # if you put class in module you need tag
-    element :asin, String, tag: "ASIN"
-    element :detail_page_url, URI, tag: "DetailPageURL", parser: :parse
-    element :manufacturer, String, tag: "Manufacturer", deep: true
-    element :point, String, tag: "point", namespace: "georss"
-    element :product_group, ProductGroup, tag: "ProductGroup", deep: true,
-                                          parser: :new, raw: true
-  end
-
-  class Items
-    include HappyMapper
-
-    tag "Items" # if you put class in module you need tag
-    element :total_results, Integer, tag: "TotalResults"
-    element :total_pages, Integer, tag: "TotalPages"
-    has_many :items, Item
-  end
-end
-
-module GitHub
-  class Commit
-    include HappyMapper
-
-    tag "commit"
-    element :url, String
-    element :tree, String
-    element :message, String
-    element :id, String
-    element :"committed-date", Date
-  end
 end
 
 module QuarterTest
@@ -396,14 +99,6 @@ class Artist
   tag "artist"
   element :images, String, tag: "image", single: false
   element :name, String
-end
-
-class Location
-  include HappyMapper
-
-  tag "point"
-  namespace "geo"
-  element :latitude, String, tag: "lat"
 end
 
 # Testing the XmlContent type
@@ -527,13 +222,6 @@ class Video
   element :publish_options, PublishOptions, tag: "publishOptions", namespace: "video"
 end
 
-class OptionalAttribute
-  include HappyMapper
-  tag "address"
-
-  attribute :street, String
-end
-
 class DefaultNamespaceCombi
   include HappyMapper
 
@@ -563,9 +251,10 @@ end
 describe HappyMapper do
   describe "being included into another class" do
     let(:klass) do
-      Class.new do
-        include HappyMapper
-      end
+      Class.new { include HappyMapper }
+    end
+    let(:nested_klass) do
+      Class.new { include HappyMapper }
     end
 
     it "sets attributes to an array" do
@@ -611,23 +300,23 @@ describe HappyMapper do
     end
 
     it "allows has one association" do
-      klass.has_one(:user, User)
+      klass.has_one(:user, nested_klass)
       element = klass.elements.first
 
       aggregate_failures do
         expect(element.name).to eq("user")
-        expect(element.type).to eq(User)
+        expect(element.type).to eq(nested_klass)
         expect(element.options[:single]).to be(true)
       end
     end
 
     it "allows has many association" do
-      klass.has_many(:users, User)
+      klass.has_many(:users, nested_klass)
       element = klass.elements.first
 
       aggregate_failures do
         expect(element.name).to eq("users")
-        expect(element.type).to eq(User)
+        expect(element.type).to eq(nested_klass)
         expect(element.options[:single]).to be(false)
       end
     end
@@ -666,19 +355,54 @@ describe HappyMapper do
   end
 
   describe "#attributes" do
+    let(:foo_klass) do
+      Class.new do
+        include HappyMapper
+
+        attribute :foo, String
+        attribute :bar, String
+      end
+    end
+    let(:bar_klass) do
+      Class.new do
+        include HappyMapper
+
+        attribute :baz1, String
+        attribute :baz2, String
+        attribute :baz3, String
+        attribute :baz4, String
+      end
+    end
+
     it "returns only attributes for the current class" do
       aggregate_failures do
-        expect(Post.attributes.size).to eq(7)
-        expect(Status.attributes.size).to eq(0)
+        expect(foo_klass.attributes.size).to eq 2
+        expect(bar_klass.attributes.size).to eq 4
       end
     end
   end
 
   describe "#elements" do
+    let(:foo_klass) do
+      Class.new do
+        include HappyMapper
+
+        element :foo, String
+      end
+    end
+    let(:bar_klass) do
+      Class.new do
+        include HappyMapper
+
+        element :baz1, String
+        element :baz2, String
+      end
+    end
+
     it "returns only elements for the current class" do
       aggregate_failures do
-        expect(Post.elements.size).to eq(0)
-        expect(Status.elements.size).to eq(10)
+        expect(foo_klass.elements.size).to eq 1
+        expect(bar_klass.elements.size).to eq 2
       end
     end
   end
@@ -708,54 +432,6 @@ describe HappyMapper do
     end
   end
 
-  it "parses xml attributes into ruby objects" do
-    posts = Post.parse(fixture_file("posts.xml"))
-
-    aggregate_failures do
-      expect(posts.size).to eq(20)
-      first = posts.first
-      expect(first.href).to eq("http://roxml.rubyforge.org/")
-      expect(first.hash).to eq("19bba2ab667be03a19f67fb67dc56917")
-      expect(first.description).to eq("ROXML - Ruby Object to XML Mapping Library")
-      expect(first.tag).to eq("ruby xml gems mapping")
-      expect(first.time).to eq(Time.utc(2008, 8, 9, 5, 24, 20))
-      expect(first.others).to eq(56)
-      expect(first.extended)
-        .to eq("ROXML is a Ruby library designed to make it easier for Ruby" \
-               " developers to work with XML. Using simple annotations, it enables" \
-               " Ruby classes to be custom-mapped to XML. ROXML takes care of the" \
-               " marshalling and unmarshalling of mapped attributes so that developers" \
-               " can focus on building first-class Ruby classes.")
-    end
-  end
-
-  it "parses xml elements to ruby objcts" do
-    statuses = Status.parse(fixture_file("statuses.xml"))
-
-    aggregate_failures do
-      expect(statuses.size).to eq(20)
-      first = statuses.first
-      expect(first.id).to eq(882_281_424)
-      expect(first.created_at).to eq(Time.utc(2008, 8, 9, 5, 38, 12))
-      expect(first.source).to eq("web")
-      expect(first.truncated).to be_falsey
-      expect(first.in_reply_to_status_id).to eq(1234)
-      expect(first.in_reply_to_user_id).to eq(12_345)
-      expect(first.favorited).to be_falsey
-      expect(first.user.id).to eq(4243)
-      expect(first.user.name).to eq("John Nunemaker")
-      expect(first.user.screen_name).to eq("jnunemaker")
-      expect(first.user.location).to eq("Mishawaka, IN, US")
-      expect(first.user.description)
-        .to eq "Loves his wife, ruby, notre dame football and iu basketball"
-      expect(first.user.profile_image_url)
-        .to eq("http://s3.amazonaws.com/twitter_production/profile_images/53781608/Photo_75_normal.jpg")
-      expect(first.user.url).to eq("http://addictedtonew.com")
-      expect(first.user.protected).to be_falsey
-      expect(first.user.followers_count).to eq(486)
-    end
-  end
-
   it "parses xml containing the desired element as root node" do
     address = Address.parse(fixture_file("address.xml"), single: true)
 
@@ -781,57 +457,6 @@ describe HappyMapper do
     doc = Nokogiri::XML(fixture_file("address.xml"))
     address = Address.parse(doc)
     expect(address.class).to eq(Address)
-  end
-
-  it "parses xml with default namespace (amazon)" do
-    file_contents = fixture_file("pita.xml")
-    items = PITA::Items.parse(file_contents, single: true)
-
-    aggregate_failures do
-      expect(items.total_results).to eq(22)
-      expect(items.total_pages).to eq(3)
-
-      first = items.items[0]
-
-      expect(first.asin).to eq("0321480791")
-      expect(first.point).to eq("38.5351715088 -121.7948684692")
-      expect(first.detail_page_url).to be_a(URI)
-      expect(first.detail_page_url.to_s).to eq("http://www.amazon.com/gp/redirect.html%3FASIN=0321480791%26tag=ws%26lcode=xm2%26cID=2025%26ccmID=165953%26location=/o/ASIN/0321480791%253FSubscriptionId=dontbeaswoosh")
-      expect(first.manufacturer).to eq("Addison-Wesley Professional")
-      expect(first.product_group).to eq("<ProductGroup>Book</ProductGroup>")
-
-      second = items.items[1]
-
-      expect(second.asin).to eq("047022388X")
-      expect(second.manufacturer).to eq("Wrox")
-    end
-  end
-
-  it "parses xml that has attributes of elements" do
-    items = CurrentWeather.parse(fixture_file("current_weather.xml"))
-    first = items[0]
-
-    aggregate_failures do
-      expect(first.temperature).to eq(51)
-      expect(first.feels_like).to eq(51)
-      expect(first.current_condition).to eq("Sunny")
-      expect(first.current_condition.icon).to eq("http://deskwx.weatherbug.com/images/Forecast/icons/cond007.gif")
-    end
-  end
-
-  it "parses xml with attributes of elements that aren't :single => true" do
-    feed = Atom::Feed.parse(fixture_file("atom.xml"))
-
-    aggregate_failures do
-      expect(feed.link.first.href).to eq("http://www.example.com")
-      expect(feed.link.last.href).to eq("http://www.example.com/tv_shows.atom")
-    end
-  end
-
-  it "parses xml with optional elements with embedded attributes" do
-    expect do
-      CurrentWeather.parse(fixture_file("current_weather_missing_elements.xml"))
-    end.not_to raise_error
   end
 
   it "returns nil rather than empty array for absent values when :single => true" do
@@ -871,18 +496,6 @@ describe HappyMapper do
     end
   end
 
-  it "parses xml that has elements with dashes" do
-    commit = GitHub::Commit.parse(fixture_file("commit.xml"))
-
-    aggregate_failures do
-      expect(commit.message).to eq("move commands.rb and helpers.rb into commands/ dir")
-      expect(commit.url).to eq("http://github.com/defunkt/github-gem/commit/c26d4ce9807ecf57d3f9eefe19ae64e75bcaaa8b")
-      expect(commit.id).to eq("c26d4ce9807ecf57d3f9eefe19ae64e75bcaaa8b")
-      expect(commit.committed_date).to eq(Date.parse("2008-03-02T16:45:41-08:00"))
-      expect(commit.tree).to eq("28a1a1ca3e663d35ba8bf07d3f1781af71359b76")
-    end
-  end
-
   it "parses xml with no namespace" do
     product = Product.parse(fixture_file("product_no_namespace.xml"), single: true)
 
@@ -919,101 +532,10 @@ describe HappyMapper do
     end
   end
 
-  it "parses xml with multiple namespaces" do
-    track = FedEx::TrackReply.parse(fixture_file("multiple_namespaces.xml"))
-
-    aggregate_failures do
-      expect(track.highest_severity).to eq("SUCCESS")
-      expect(track.more_data).to be_falsey
-      notification = track.notifications.first
-      expect(notification.code).to eq(0)
-      expect(notification.localized_message).to eq("Request was successfully processed.")
-      expect(notification.message).to eq("Request was successfully processed.")
-      expect(notification.severity).to eq("SUCCESS")
-      expect(notification.source).to eq("trck")
-      detail = track.trackdetails.first
-      expect(detail.carrier_code).to eq("FDXG")
-      expect(detail.est_delivery).to eq("2009-01-02T00:00:00")
-      expect(detail.service_info).to eq("Ground-Package Returns Program-Domestic")
-      expect(detail.status_code).to eq("OD")
-      expect(detail.status_desc).to eq("On FedEx vehicle for delivery")
-      expect(detail.tracking_number).to eq("9611018034267800045212")
-      expect(detail.weight.units).to eq("LB")
-      expect(detail.weight.value).to eq(2)
-      events = detail.events
-      expect(events.size).to eq(10)
-      first_event = events[0]
-      expect(first_event.eventdescription).to eq("On FedEx vehicle for delivery")
-      expect(first_event.eventtype).to eq("OD")
-      expect(first_event.timestamp).to eq("2009-01-02T06:00:00")
-      expect(first_event.address.city).to eq("WICHITA")
-      expect(first_event.address.countrycode).to eq("US")
-      expect(first_event.address.residential).to be_falsey
-      expect(first_event.address.state).to eq("KS")
-      expect(first_event.address.zip).to eq("67226")
-      last_event = events[-1]
-      expect(last_event.eventdescription).to eq("In FedEx possession")
-      expect(last_event.eventtype).to eq("IP")
-      expect(last_event.timestamp).to eq("2008-12-27T09:40:00")
-      expect(last_event.address.city).to eq("LONGWOOD")
-      expect(last_event.address.countrycode).to eq("US")
-      expect(last_event.address.residential).to be_falsey
-      expect(last_event.address.state).to eq("FL")
-      expect(last_event.address.zip).to eq("327506398")
-      expect(track.tran_detail.cust_tran_id).to eq("20090102-111321")
-    end
-  end
-
-  it "is able to parse google analytics api xml" do
-    data = Analytics::Feed.parse(fixture_file("analytics.xml"))
-
-    aggregate_failures do
-      expect(data.id).to eq("http://www.google.com/analytics/feeds/accounts/nunemaker@gmail.com")
-      expect(data.entries.size).to eq(4)
-
-      entry = data.entries[0]
-      expect(entry.title).to eq("addictedtonew.com")
-      expect(entry.properties.size).to eq(4)
-
-      property = entry.properties[0]
-      expect(property.name).to eq("ga:accountId")
-      expect(property.value).to eq("85301")
-    end
-  end
-
-  it "is able to parse google analytics profile xml with manually declared namespace" do
-    data = Analytics::Profile.parse(fixture_file("analytics_profile.xml"))
-
-    aggregate_failures do
-      expect(data.entries.size).to eq(6)
-      entry = data.entries[0]
-      expect(entry.title).to eq("www.homedepot.com")
-      expect(entry.properties.size).to eq(6)
-      expect(entry.goals.size).to eq(0)
-    end
-  end
-
   it "allows speficying child element class with a string" do
     bar = StringFoo::Bar.parse "<bar><thing/></bar>"
 
     expect(bar.things).to contain_exactly(StringFoo::Thing)
-  end
-
-  it "parses family search xml" do
-    tree = FamilySearch::FamilyTree.parse(fixture_file("family_tree.xml"))
-
-    aggregate_failures do
-      expect(tree.version).to eq("1.0.20071213.942")
-      expect(tree.status_message).to eq("OK")
-      expect(tree.status_code).to eq("200")
-      expect(tree.persons.person.size).to eq(1)
-      expect(tree.persons.person.first.version).to eq("1199378491000")
-      expect(tree.persons.person.first.modified)
-        .to eq(Time.utc(2008, 1, 3, 16, 41, 31)) # 2008-01-03T09:41:31-07:00
-      expect(tree.persons.person.first.id).to eq("KWQS-BBQ")
-      expect(tree.persons.person.first.information.alternateIds.ids).not_to be_a(String)
-      expect(tree.persons.person.first.information.alternateIds.ids.size).to eq(8)
-    end
   end
 
   it "parses multiple images" do
@@ -1022,27 +544,6 @@ describe HappyMapper do
     aggregate_failures do
       expect(artist.name).to eq("value")
       expect(artist.images.size).to eq(2)
-    end
-  end
-
-  it "parses lastfm namespaces" do
-    l = Location.parse(fixture_file("lastfm.xml"))
-    expect(l.first.latitude).to eq("51.53469")
-  end
-
-  describe "Parse optional attributes" do
-    let(:parsed_result) { OptionalAttribute.parse(fixture_file("optional_attributes.xml")) }
-
-    it "parses an empty String as empty" do
-      expect(parsed_result[0].street).to eq("")
-    end
-
-    it "parses a String with value" do
-      expect(parsed_result[1].street).to eq("Milchstrasse")
-    end
-
-    it "parses an element with no value for the attribute" do
-      expect(parsed_result[2].street).to be_nil
     end
   end
 
@@ -1128,9 +629,16 @@ describe HappyMapper do
   end
 
   describe "with limit option" do
+    let(:post_klass) do
+      Class.new do
+        include HappyMapper
+        tag "post"
+      end
+    end
+
     it "returns results with limited size: 6" do
       sizes = []
-      Post.parse(fixture_file("posts.xml"), in_groups_of: 6) do |a|
+      post_klass.parse(fixture_file("posts.xml"), in_groups_of: 6) do |a|
         sizes << a.size
       end
       expect(sizes).to eq([6, 6, 6, 2])
@@ -1138,7 +646,7 @@ describe HappyMapper do
 
     it "returns results with limited size: 10" do
       sizes = []
-      Post.parse(fixture_file("posts.xml"), in_groups_of: 10) do |a|
+      post_klass.parse(fixture_file("posts.xml"), in_groups_of: 10) do |a|
         sizes << a.size
       end
       expect(sizes).to eq([10, 10])

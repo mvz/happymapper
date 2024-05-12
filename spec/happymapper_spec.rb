@@ -527,13 +527,6 @@ class Video
   element :publish_options, PublishOptions, tag: "publishOptions", namespace: "video"
 end
 
-class OptionalAttribute
-  include HappyMapper
-  tag "address"
-
-  attribute :street, String
-end
-
 class DefaultNamespaceCombi
   include HappyMapper
 
@@ -1028,22 +1021,6 @@ describe HappyMapper do
   it "parses lastfm namespaces" do
     l = Location.parse(fixture_file("lastfm.xml"))
     expect(l.first.latitude).to eq("51.53469")
-  end
-
-  describe "Parse optional attributes" do
-    let(:parsed_result) { OptionalAttribute.parse(fixture_file("optional_attributes.xml")) }
-
-    it "parses an empty String as empty" do
-      expect(parsed_result[0].street).to eq("")
-    end
-
-    it "parses a String with value" do
-      expect(parsed_result[1].street).to eq("Milchstrasse")
-    end
-
-    it "parses an element with no value for the attribute" do
-      expect(parsed_result[2].street).to be_nil
-    end
   end
 
   describe "Default namespace combi" do

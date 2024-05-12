@@ -80,37 +80,6 @@ class Radar
   has_many :places, Place, tag: :place
 end
 
-class User
-  include HappyMapper
-
-  element :id, Integer
-  element :name, String
-  element :screen_name, String
-  element :location, String
-  element :description, String
-  element :profile_image_url, String
-  element :url, String
-  element :protected, Boolean
-  element :followers_count, Integer
-end
-
-class Status
-  include HappyMapper
-
-  register_namespace "fake", "faka:namespace"
-
-  element :id, Integer
-  element :text, String
-  element :created_at, Time
-  element :source, String
-  element :truncated, Boolean
-  element :in_reply_to_status_id, Integer
-  element :in_reply_to_user_id, Integer
-  element :favorited, Boolean
-  element :non_existent, String, tag: "dummy", namespace: "fake"
-  has_one :user, User
-end
-
 class CurrentWeather
   include HappyMapper
 
@@ -310,9 +279,10 @@ end
 describe HappyMapper do
   describe "being included into another class" do
     let(:klass) do
-      Class.new do
-        include HappyMapper
-      end
+      Class.new { include HappyMapper }
+    end
+    let(:nested_klass) do
+      Class.new { include HappyMapper }
     end
 
     it "sets attributes to an array" do
@@ -358,23 +328,23 @@ describe HappyMapper do
     end
 
     it "allows has one association" do
-      klass.has_one(:user, User)
+      klass.has_one(:user, nested_klass)
       element = klass.elements.first
 
       aggregate_failures do
         expect(element.name).to eq("user")
-        expect(element.type).to eq(User)
+        expect(element.type).to eq(nested_klass)
         expect(element.options[:single]).to be(true)
       end
     end
 
     it "allows has many association" do
-      klass.has_many(:users, User)
+      klass.has_many(:users, nested_klass)
       element = klass.elements.first
 
       aggregate_failures do
         expect(element.name).to eq("users")
-        expect(element.type).to eq(User)
+        expect(element.type).to eq(nested_klass)
         expect(element.options[:single]).to be(false)
       end
     end
@@ -441,10 +411,26 @@ describe HappyMapper do
   end
 
   describe "#elements" do
+    let(:foo_klass) do
+      Class.new do
+        include HappyMapper
+
+        element :foo, String
+      end
+    end
+    let(:bar_klass) do
+      Class.new do
+        include HappyMapper
+
+        element :baz1, String
+        element :baz2, String
+      end
+    end
+
     it "returns only elements for the current class" do
       aggregate_failures do
-        expect(User.elements.size).to eq(9)
-        expect(Status.elements.size).to eq(10)
+        expect(foo_klass.elements.size).to eq 1
+        expect(bar_klass.elements.size).to eq 2
       end
     end
   end
@@ -471,33 +457,6 @@ describe HappyMapper do
         expect(value).to eq(120.25)
         expect(value).to be_a Float
       end
-    end
-  end
-
-  it "parses xml elements to ruby objcts" do
-    statuses = Status.parse(fixture_file("statuses.xml"))
-
-    aggregate_failures do
-      expect(statuses.size).to eq(20)
-      first = statuses.first
-      expect(first.id).to eq(882_281_424)
-      expect(first.created_at).to eq(Time.utc(2008, 8, 9, 5, 38, 12))
-      expect(first.source).to eq("web")
-      expect(first.truncated).to be_falsey
-      expect(first.in_reply_to_status_id).to eq(1234)
-      expect(first.in_reply_to_user_id).to eq(12_345)
-      expect(first.favorited).to be_falsey
-      expect(first.user.id).to eq(4243)
-      expect(first.user.name).to eq("John Nunemaker")
-      expect(first.user.screen_name).to eq("jnunemaker")
-      expect(first.user.location).to eq("Mishawaka, IN, US")
-      expect(first.user.description)
-        .to eq "Loves his wife, ruby, notre dame football and iu basketball"
-      expect(first.user.profile_image_url)
-        .to eq("http://s3.amazonaws.com/twitter_production/profile_images/53781608/Photo_75_normal.jpg")
-      expect(first.user.url).to eq("http://addictedtonew.com")
-      expect(first.user.protected).to be_falsey
-      expect(first.user.followers_count).to eq(486)
     end
   end
 

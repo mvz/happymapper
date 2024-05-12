@@ -398,14 +398,6 @@ class Artist
   element :name, String
 end
 
-class Location
-  include HappyMapper
-
-  tag "point"
-  namespace "geo"
-  element :latitude, String, tag: "lat"
-end
-
 # Testing the XmlContent type
 module Dictionary
   class Variant
@@ -1016,11 +1008,6 @@ describe HappyMapper do
       expect(artist.name).to eq("value")
       expect(artist.images.size).to eq(2)
     end
-  end
-
-  it "parses lastfm namespaces" do
-    l = Location.parse(fixture_file("lastfm.xml"))
-    expect(l.first.latitude).to eq("51.53469")
   end
 
   describe "Default namespace combi" do

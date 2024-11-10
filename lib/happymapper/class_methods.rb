@@ -372,8 +372,6 @@ module HappyMapper
       # when at the root use the xpath '/' otherwise use a more gready './/'
       # unless an xpath has been specified, which should overwrite default
       # and finally attach the current namespace if one has been defined
-      #
-
       xpath = if options[:xpath]
                 options[:xpath].to_s.sub(%r{([^/])$}, '\1/')
               elsif root
@@ -389,31 +387,14 @@ module HappyMapper
         xpath += "#{namespace}:"
       end
 
-      nodes = []
-
-      # when finding nodes, do it in this order:
-      # 1. specified tag if one has been provided
-      # 2. name of element
-      # 3. tag_name (derived from class name by default)
-
-      # If a tag has been provided we need to search for it.
-
-      if options.key?(:tag)
-        nodes = node.xpath(xpath + options[:tag].to_s, namespaces)
+      # Find the nodes by the :tag option if given, or by tag_name (derived
+      # from the class name by default). If the :tag option is given, the
+      # tag_name will not be used.
+      if (xpath_ext = options[:tag] || tag_name)
+        node.xpath(xpath + xpath_ext.to_s, namespaces)
       else
-
-        # This is the default case when no tag value is provided.
-        # First we use the name of the element `items` in `has_many items`
-        # Second we use the tag name which is the name of the class cleaned up
-
-        [options[:name], tag_name].compact.each do |xpath_ext|
-          nodes = node.xpath(xpath + xpath_ext.to_s, namespaces)
-          break if nodes && !nodes.empty?
-        end
-
+        []
       end
-
-      nodes
     end
 
     def parse_node(node, options, namespace, namespaces)

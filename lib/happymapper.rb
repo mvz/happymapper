@@ -73,7 +73,6 @@ module HappyMapper
   #
   def to_xml(builder = nil, default_namespace = nil, namespace_override = nil,
              tag_from_parent = nil)
-
     #
     # If to_xml has been called without a passed in builder instance that
     # means we are going to return xml output. When it has been called with

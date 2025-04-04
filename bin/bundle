@@ -60,7 +60,7 @@ m = Module.new do
     return unless File.file?(lockfile)
 
     lockfile_contents = File.read(lockfile)
-    unless lockfile_contents =~ \
+    unless lockfile_contents =~
            /\n\nBUNDLED WITH\n\s{2,}(#{Gem::Version::VERSION_PATTERN})\n/o
       return
     end

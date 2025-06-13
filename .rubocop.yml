@@ -43,7 +43,7 @@ Metrics/ParameterLists:
   Max: 6
   MaxOptionalParameters: 4
 
-Naming/PredicateName:
+Naming/PredicatePrefix:
   AllowedMethods:
     - 'has_one'
     - 'has_many'

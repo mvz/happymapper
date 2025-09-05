@@ -9,6 +9,7 @@ module Sheep
 
   class Navigator
     include HappyMapper
+
     tag "navigator"
 
     # This is purposefully set to have the name 'items' with the tag 'item'.

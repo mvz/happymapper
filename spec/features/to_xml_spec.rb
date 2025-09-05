@@ -85,6 +85,7 @@ module ToXML
     #
     class Description
       include HappyMapper
+
       content :description, String
       attribute :category, String, tag: "category"
       attribute :rating, String, tag: "rating", state_when_nil: true

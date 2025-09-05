@@ -4,6 +4,7 @@ require "spec_helper"
 
 class Meal
   include HappyMapper
+
   tag "meal"
   attribute :type, String, default: "omnivore"
 end

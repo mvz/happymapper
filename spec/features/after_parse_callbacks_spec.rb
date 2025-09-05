@@ -5,6 +5,7 @@ require "spec_helper"
 module AfterParseSpec
   class Address
     include HappyMapper
+
     element :street, String
   end
 end

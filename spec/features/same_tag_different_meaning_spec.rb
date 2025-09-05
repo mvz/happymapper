@@ -5,16 +5,19 @@ require "spec_helper"
 module SameTagSpec
   class Bar
     include HappyMapper
+
     has_one :baz, String
   end
 
   class Baz
     include HappyMapper
+
     has_one :qux, String
   end
 
   class Foo
     include HappyMapper
+
     has_one :bar, Bar
     has_one :baz, Baz, xpath: "."
   end

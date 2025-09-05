@@ -37,6 +37,7 @@ RSpec.describe "parsing a VOD catalog" do
 
     translations = Class.new do
       include HappyMapper
+
       tag "Translation"
 
       attribute :language, String, tag: "Language"

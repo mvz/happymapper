@@ -42,6 +42,7 @@ module HappyMapper
       klass = Class.new
       klass.class_eval do
         include HappyMapper
+
         tag tag_name
       end
       klass

@@ -5,6 +5,7 @@ require "spec_helper"
 module ParseInstanceSpec
   class SubItem
     include HappyMapper
+
     tag "subitem"
     attribute :attr1, String
     element :name, String
@@ -12,6 +13,7 @@ module ParseInstanceSpec
 
   class Item
     include HappyMapper
+
     tag "item"
     attribute :attr1, String
     element :description, String
@@ -20,6 +22,7 @@ module ParseInstanceSpec
 
   class Root
     include HappyMapper
+
     tag "root"
     attribute :attr1, String
     has_many :items, Item

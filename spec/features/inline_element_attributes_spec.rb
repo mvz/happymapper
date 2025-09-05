@@ -19,6 +19,7 @@ RSpec.describe "specifying element attributes inline" do
   let(:atomfeed_klass) do
     Class.new do
       include HappyMapper
+
       tag "feed"
 
       attribute :xmlns, String, single: true

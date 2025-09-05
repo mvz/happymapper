@@ -29,6 +29,7 @@ end
 
 class Feature
   include HappyMapper
+
   element :name, String, xpath: ".//text()"
 end
 
@@ -54,11 +55,13 @@ end
 
 class Place
   include HappyMapper
+
   element :name, String
 end
 
 class Radar
   include HappyMapper
+
   has_many :places, Place, tag: :place
 end
 
@@ -105,6 +108,7 @@ end
 module Dictionary
   class Variant
     include HappyMapper
+
     tag "var"
     has_xml_content
 
@@ -240,6 +244,7 @@ end
 module StringFoo
   class Bar
     include HappyMapper
+
     has_many :things, "StringFoo::Thing"
   end
 
@@ -632,6 +637,7 @@ describe HappyMapper do
     let(:post_klass) do
       Class.new do
         include HappyMapper
+
         tag "post"
       end
     end
@@ -657,12 +663,14 @@ describe HappyMapper do
     let(:default) do
       Class.new do
         include HappyMapper
+
         element :item, String
       end
     end
     let(:custom) do
       Class.new do
         include HappyMapper
+
         element :item, String
         with_nokogiri_config(&:default_xml)
       end

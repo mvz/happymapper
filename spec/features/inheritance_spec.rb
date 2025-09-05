@@ -5,17 +5,20 @@ require "spec_helper"
 module Inheritance
   class Genetics
     include HappyMapper
+
     content :dna, String
   end
 
   class Parent
     include HappyMapper
+
     attribute :love, Integer
     element :genetics, Genetics
   end
 
   class Child < Parent
     include HappyMapper
+
     attribute :naivety, String
     has_many :immunities, String
   end

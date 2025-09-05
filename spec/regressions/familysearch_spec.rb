@@ -31,6 +31,7 @@ RSpec.describe "parsing a familysearch family tree" do
 
     persons_klass = Class.new do
       include HappyMapper
+
       has_many :person, Person
     end
     stub_const "Persons", persons_klass

@@ -116,6 +116,7 @@ end
 module CoffeeMaking
   class Beverage
     include HappyMapper
+
     namespace "coffee"
 
     attribute :name, String
@@ -123,6 +124,7 @@ module CoffeeMaking
 
   class CoffeeMachine
     include HappyMapper
+
     register_namespace "coffee", "http://coffee.org/Coffee/0.1"
     register_namespace "beverage", "http://beverages.org/Beverage/0.1"
 

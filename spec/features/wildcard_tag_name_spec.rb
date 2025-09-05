@@ -31,6 +31,7 @@ module GenericBase
 
   class SubList
     include HappyMapper
+
     tag "sublist"
 
     has_many :jellos, Wild, tag: "jello"
@@ -39,6 +40,7 @@ module GenericBase
 
   class Fixed
     include HappyMapper
+
     tag "fixed_element"
 
     attribute :name, String
@@ -52,6 +54,7 @@ module GenericBase
 
   class Root
     include HappyMapper
+
     tag "root"
     element :description, String
     has_many :blargs, Wild, tag: "blarg", xpath: "."

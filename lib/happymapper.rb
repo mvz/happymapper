@@ -151,6 +151,7 @@ module HappyMapper
     def self.get(name, &blk)
       Class.new do
         include HappyMapper
+
         tag name
         instance_eval(&blk)
       end

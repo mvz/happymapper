@@ -5,6 +5,7 @@ require "spec_helper"
 module Wrap
   class SubClass
     include HappyMapper
+
     tag "subclass"
     attribute :myattr, String
     has_many :items, String, tag: "item"
@@ -12,6 +13,7 @@ module Wrap
 
   class Root
     include HappyMapper
+
     tag "root"
     attribute :attr1, String
     element :name, String
@@ -24,6 +26,7 @@ module Wrap
 
   class Root2
     include HappyMapper
+
     tag "root"
 
     wrap "tag_wrapper", tag: "mywraptag" do

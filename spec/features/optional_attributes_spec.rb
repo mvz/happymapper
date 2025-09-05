@@ -4,6 +4,7 @@ RSpec.describe "Parsing optional attributes" do
   before do
     klass = Class.new do
       include HappyMapper
+
       tag "address"
 
       attribute :street, String

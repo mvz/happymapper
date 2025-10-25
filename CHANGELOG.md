@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.10.1 / 2025-10-25
+
+* Fix namespace prefix collisions ([#231] by [petersen])
+
+[petersen]: https://github.com/petersen
+[#231]: https://github.com/mvz/happymapper/pull/231
+
 ## 0.10.0 / 2024-01-05
 
 * Fix typo in README code sample ([#198] by [Spone])

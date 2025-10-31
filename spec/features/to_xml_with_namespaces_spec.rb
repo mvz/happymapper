@@ -268,4 +268,35 @@ RSpec.describe "Saving #to_xml with xml namespaces" do
       expect(machine.to_xml).to eq(expected_xml)
     end
   end
+
+  context "with namespace set on base type child elements" do
+    let(:klass) do
+      Class.new do
+        include HappyMapper
+
+        register_namespace "prefix", "http://www.unicornland.com/prefix"
+        tag :foo
+        has_one :bar, String, namespace: "prefix"
+      end
+    end
+
+    it "renders xml that can be parsed by the same class" do
+      obj = klass.new
+      obj.bar = "foobar"
+      copy = klass.parse(obj.to_xml)
+      expect(copy.bar).to eq obj.bar
+    end
+
+    it "renders the namespace definition only on the root element" do
+      obj = klass.new
+      obj.bar = "foobar"
+
+      expect(obj.to_xml).to eq <<~XML
+        <?xml version="1.0"?>
+        <foo xmlns:prefix="http://www.unicornland.com/prefix">
+          <prefix:bar>foobar</prefix:bar>
+        </foo>
+      XML
+    end
+  end
 end

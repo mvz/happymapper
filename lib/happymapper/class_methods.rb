@@ -177,7 +177,7 @@ module HappyMapper
     #     element.
     #
     def namespace(namespace = nil)
-      @namespace = namespace if namespace
+      @namespace = namespace.to_s if namespace
       @namespace if defined? @namespace
     end
 

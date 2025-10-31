@@ -207,7 +207,7 @@ module HappyMapper
       #
       next if value.nil? && !attribute.options[:state_when_nil]
 
-      attribute_namespace = attribute.options[:namespace]
+      attribute_namespace = attribute.namespace
       attribute_name = if attribute_namespace
                          "#{attribute_namespace}:#{attribute.tag}"
                        else
@@ -277,13 +277,13 @@ module HappyMapper
         # to the builder structure
         #
         item.to_xml(xml, self.class.namespace || default_namespace,
-                    element.options[:namespace],
+                    element.namespace,
                     element.options[:tag] || nil)
 
       elsif !item.nil? || element.options[:state_when_nil]
 
         item_namespace =
-          element.options[:namespace] ||
+          element.namespace ||
           self.class.namespace ||
           default_namespace
 

@@ -18,6 +18,7 @@ module HappyMapper
       self.type = type
       # self.tag = options.delete(:tag) || name.to_s
       self.tag = options[:tag] || name.to_s
+      self.namespace = options[:namespace]&.to_s
       self.options = { single: true }.merge(options.merge(name: self.name))
 
       @xml_type = self.class.to_s.split("::").last.downcase
@@ -33,7 +34,7 @@ module HappyMapper
     # @param [Hash] xpath_options additional xpath options
     #
     def from_xml_node(node, namespace, xpath_options)
-      namespace = options[:namespace] if options.key?(:namespace)
+      namespace = self.namespace if options.key?(:namespace)
 
       if custom_parser_defined?
         find(node, namespace, xpath_options) { |n| process_node_with_custom_parser(n) }

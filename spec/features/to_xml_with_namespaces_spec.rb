@@ -269,6 +269,37 @@ RSpec.describe "Saving #to_xml with xml namespaces" do
     end
   end
 
+  context "with namespace set on child elements using a symbol" do
+    before do
+      stub_const "Beverage", Class.new {
+        include HappyMapper
+
+        attribute :name, String
+      }
+
+      stub_const "CoffeeMachine", Class.new {
+        include HappyMapper
+
+        register_namespace "beverage", "http://beverages.org/Beverage/0.1"
+
+        element :beverage, "beverage", namespace: :beverage
+      }
+    end
+
+    it "uses the element declaration namespace on the element" do
+      machine = CoffeeMachine.new
+      machine.beverage = Beverage.new.tap { |obj| obj.name = "coffee" }
+      expected_xml = <<~XML
+        <?xml version="1.0"?>
+        <coffeemachine xmlns:beverage="http://beverages.org/Beverage/0.1">
+          <beverage:beverage name="coffee"/>
+        </coffeemachine>
+      XML
+
+      expect(machine.to_xml).to eq(expected_xml)
+    end
+  end
+
   context "with namespace set on base type child elements" do
     let(:klass) do
       Class.new do
@@ -300,7 +331,38 @@ RSpec.describe "Saving #to_xml with xml namespaces" do
     end
   end
 
-  context "with namespace set on the root object using a symbol" do
+  context "with namespace set on base type child elements using a symbol" do
+    let(:klass) do
+      Class.new do
+        include HappyMapper
+
+        register_namespace "prefix", "http://www.unicornland.com/prefix"
+        tag :foo
+        has_one :bar, String, namespace: :prefix
+      end
+    end
+
+    it "renders xml that can be parsed by the same class" do
+      obj = klass.new
+      obj.bar = "foobar"
+      copy = klass.parse(obj.to_xml)
+      expect(copy.bar).to eq obj.bar
+    end
+
+    it "renders the namespace definition only on the root element" do
+      obj = klass.new
+      obj.bar = "foobar"
+
+      expect(obj.to_xml).to eq <<~XML
+        <?xml version="1.0"?>
+        <foo xmlns:prefix="http://www.unicornland.com/prefix">
+          <prefix:bar>foobar</prefix:bar>
+        </foo>
+      XML
+    end
+  end
+
+  context "with namespace set on the root object using a string" do
     let(:klass) do
       Class.new do
         include HappyMapper

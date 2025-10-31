@@ -2,154 +2,111 @@
 
 require "spec_helper"
 
-module ToXMLWithNamespaces
-  #
-  # Similar example as the to_xml but this time with namespacing
-  #
-  class Address
-    include HappyMapper
-
-    register_namespace "address", "http://www.company.com/address"
-    register_namespace "country", "http://www.company.com/country"
-
-    tag "Address"
-    namespace "address"
-
-    element :country, "Country", tag: "country", namespace: "country"
-
-    attribute :location, String, on_save: :when_saving_location
-
-    element :street, String
-    element :postcode, String
-    element :city, String
-
-    element :housenumber, String
-
-    #
-    # to_xml will default to the attr_accessor method and not the attribute,
-    # allowing for that to be overwritten
-    #
-    remove_method :housenumber
-
-    def housenumber
-      "[#{@housenumber}]"
-    end
-
-    def when_saving_location(loc)
-      "#{loc}-live"
-    end
-
-    #
-    # Write a empty element even if this is not specified
-    #
-    element :description, String, state_when_nil: true
-
-    #
-    # Perform the on_save operation when saving
-    #
-    has_one :date_created, Time,
-            on_save: ->(time) { Time.parse(time).strftime("%T %D") if time }
-
-    #
-    # Write multiple elements and call on_save when saving
-    #
-    has_many :dates_updated, Time, on_save: lambda { |times|
-      times.compact.map { |time| Time.parse(time).strftime("%T %D") } if times
-    }
-
-    #
-    # Class composition
-    #
-
-    def initialize(parameters)
-      parameters.each_pair do |property, value|
-        send(:"#{property}=", value) if respond_to?(:"#{property}=")
-      end
-    end
-  end
-
-  #
-  # Country is composed above the in Address class. Here is a demonstration
-  # of how to_xml will handle class composition as well as utilizing the tag
-  # value.
-  #
-  class Country
-    include HappyMapper
-
-    register_namespace "countryName", "http://www.company.com/countryName"
-
-    attribute :code, String, tag: "countryCode"
-    has_one :name, String, tag: "countryName", namespace: "countryName",
-                           state_when_nil: true
-
-    def initialize(parameters)
-      parameters.each_pair do |property, value|
-        send(:"#{property}=", value) if respond_to?(:"#{property}=")
-      end
-    end
-  end
-
-  #
-  # This class is an example of a class that has a default namespace
-  # xmlns="urn:eventis:prodis:onlineapi:1.0"
-  # xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  # xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-  #
-  class Recipe
-    include HappyMapper
-
-    # this is the default namespace of the document
-    register_namespace "xmlns", "urn:eventis:prodis:onlineapi:1.0"
-    register_namespace "xsi", "http://www.w3.org/2001/XMLSchema-instance"
-    register_namespace "xsd", "http://www.w3.org/2001/XMLSchema"
-
-    has_many :ingredients, String
-
-    def initialize(parameters)
-      parameters.each_pair do |property, value|
-        send(:"#{property}=", value) if respond_to?(:"#{property}=")
-      end
-    end
-  end
-end
-
-module CoffeeMaking
-  class Beverage
-    include HappyMapper
-
-    namespace "coffee"
-
-    attribute :name, String
-  end
-
-  class CoffeeMachine
-    include HappyMapper
-
-    register_namespace "coffee", "http://coffee.org/Coffee/0.1"
-    register_namespace "beverage", "http://beverages.org/Beverage/0.1"
-
-    element :beverage, "beverage", namespace: "beverage"
-  end
-end
-
 RSpec.describe "Saving #to_xml with xml namespaces" do
-  context "with namespaces" do
+  context "with a complicated example with namespaces" do
+    before do
+      #
+      # Similar example as the to_xml but this time with namespacing
+      #
+      stub_const "Address", Class.new {
+        include HappyMapper
+
+        register_namespace "address", "http://www.company.com/address"
+        register_namespace "country", "http://www.company.com/country"
+
+        tag "Address"
+        namespace "address"
+
+        element :country, "Country", tag: "country", namespace: "country"
+
+        attribute :location, String, on_save: :when_saving_location
+
+        element :street, String
+        element :postcode, String
+        element :city, String
+
+        element :housenumber, String
+
+        #
+        # to_xml will default to the attr_accessor method and not the attribute,
+        # allowing for that to be overwritten
+        #
+        remove_method :housenumber
+
+        def housenumber
+          "[#{@housenumber}]"
+        end
+
+        def when_saving_location(loc)
+          "#{loc}-live"
+        end
+
+        #
+        # Write a empty element even if this is not specified
+        #
+        element :description, String, state_when_nil: true
+
+        #
+        # Perform the on_save operation when saving
+        #
+        has_one :date_created, Time,
+                on_save: ->(time) { Time.parse(time).strftime("%T %D") if time }
+
+        #
+        # Write multiple elements and call on_save when saving
+        #
+        has_many :dates_updated, Time, on_save: lambda { |times|
+          times.compact.map { |time| Time.parse(time).strftime("%T %D") } if times
+        }
+
+        #
+        # Class composition
+        #
+
+        def initialize(parameters)
+          parameters.each_pair do |property, value|
+            send(:"#{property}=", value) if respond_to?(:"#{property}=")
+          end
+        end
+      }
+      #
+      # Country is composed above the in Address class. Here is a demonstration
+      # of how to_xml will handle class composition as well as utilizing the tag
+      # value.
+      #
+      stub_const "Country", Class.new {
+        include HappyMapper
+
+        register_namespace "countryName", "http://www.company.com/countryName"
+
+        attribute :code, String, tag: "countryCode"
+        has_one :name, String, tag: "countryName", namespace: "countryName",
+                               state_when_nil: true
+
+        def initialize(parameters)
+          parameters.each_pair do |property, value|
+            send(:"#{property}=", value) if respond_to?(:"#{property}=")
+          end
+        end
+      }
+    end
+
     let(:xml) do
-      country = ToXMLWithNamespaces::Country.new(name: "USA", code: "us")
-      address = ToXMLWithNamespaces::Address.new("street" => "Mockingbird Lane",
-                                                 "location" => "Home",
-                                                 "housenumber" => "1313",
-                                                 "postcode" => "98103",
-                                                 "city" => "Seattle",
-                                                 "country" => country,
-                                                 "date_created" => "2011-01-01 15:00:00")
+      country = Country.new(name: "USA", code: "us")
+      address = Address.new("street" => "Mockingbird Lane",
+                            "location" => "Home",
+                            "housenumber" => "1313",
+                            "postcode" => "98103",
+                            "city" => "Seattle",
+                            "country" => country,
+                            "date_created" => "2011-01-01 15:00:00")
 
       address.dates_updated = ["2011-01-01 16:01:00", "2011-01-02 11:30:01"]
 
       Nokogiri::XML(address.to_xml).root
     end
 
-    it "sets the namespace specified in the class" do
+    it "sets the namespace for the top-level element as specified in the class" do
       expect(xml.xpath("/").children.first.namespace.prefix).to eq "address"
     end
 
@@ -178,8 +135,8 @@ RSpec.describe "Saving #to_xml with xml namespaces" do
 
     context "when a scalar element is nil and does not have state_when_nil: true" do
       let(:xml) do
-        address = ToXMLWithNamespaces::Address.new("street" => "Mockingbird Lane",
-                                                   "location" => nil)
+        address = Address.new("street" => "Mockingbird Lane",
+                              "location" => nil)
         Nokogiri::XML(address.to_xml).root
       end
 
@@ -192,9 +149,9 @@ RSpec.describe "Saving #to_xml with xml namespaces" do
     context \
       "when a scalar element with its own namespace is nil and has state_when_nil: true" do
       let(:xml) do
-        country = ToXMLWithNamespaces::Country.new(name: nil, code: "us")
-        address = ToXMLWithNamespaces::Address.new(street: "Mockingbird Lane",
-                                                   country: country)
+        country = Country.new(name: nil, code: "us")
+        address = Address.new(street: "Mockingbird Lane",
+                              country: country)
 
         Nokogiri::XML(address.to_xml).root
       end
@@ -256,10 +213,23 @@ RSpec.describe "Saving #to_xml with xml namespaces" do
   end
 
   context "with a default namespace" do
+    before do
+      stub_const "Recipe", Class.new {
+        include HappyMapper
+
+        # this is the default namespace of the document
+        register_namespace "xmlns", "urn:eventis:prodis:onlineapi:1.0"
+        register_namespace "xsi", "http://www.w3.org/2001/XMLSchema-instance"
+        register_namespace "xsd", "http://www.w3.org/2001/XMLSchema"
+
+        has_many :ingredients, String
+      }
+    end
+
     it "writes the default namespace to xml without repeating xmlns" do
-      recipe = ToXMLWithNamespaces::Recipe.new(ingredients: ["One Cup Flour",
-                                                             "Two Scoops of Lovin"])
-      expect(recipe.to_xml).to match(/xmlns="urn:eventis:prodis:onlineapi:1\.0"/)
+      recipe = Recipe.new
+      recipe.ingredients = ["One Cup Flour", "Two Scoops of Lovin"]
+      expect(recipe.to_xml).to match(/ xmlns="urn:eventis:prodis:onlineapi:1\.0"/)
     end
   end
 
@@ -273,10 +243,60 @@ RSpec.describe "Saving #to_xml with xml namespaces" do
       XML
     end
 
+    before do
+      stub_const "Beverage", Class.new {
+        include HappyMapper
+
+        namespace "coffee"
+
+        attribute :name, String
+      }
+
+      stub_const "CoffeeMachine", Class.new {
+        include HappyMapper
+
+        register_namespace "coffee", "http://coffee.org/Coffee/0.1"
+        register_namespace "beverage", "http://beverages.org/Beverage/0.1"
+
+        element :beverage, "beverage", namespace: "beverage"
+      }
+    end
+
     it "uses the element declaration namespace on the element" do
-      machine = CoffeeMaking::CoffeeMachine.new
-      machine.beverage = CoffeeMaking::Beverage.new.tap { |obj| obj.name = "coffee" }
+      machine = CoffeeMachine.new
+      machine.beverage = Beverage.new.tap { |obj| obj.name = "coffee" }
       expect(machine.to_xml).to eq(expected_xml)
+    end
+  end
+
+  context "with namespace set on base type child elements" do
+    let(:klass) do
+      Class.new do
+        include HappyMapper
+
+        register_namespace "prefix", "http://www.unicornland.com/prefix"
+        tag :foo
+        has_one :bar, String, namespace: "prefix"
+      end
+    end
+
+    it "renders xml that can be parsed by the same class" do
+      obj = klass.new
+      obj.bar = "foobar"
+      copy = klass.parse(obj.to_xml)
+      expect(copy.bar).to eq obj.bar
+    end
+
+    it "renders the namespace definition only on the root element" do
+      obj = klass.new
+      obj.bar = "foobar"
+
+      expect(obj.to_xml).to eq <<~XML
+        <?xml version="1.0"?>
+        <foo xmlns:prefix="http://www.unicornland.com/prefix">
+          <prefix:bar>foobar</prefix:bar>
+        </foo>
+      XML
     end
   end
 end

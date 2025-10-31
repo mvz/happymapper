@@ -393,4 +393,36 @@ RSpec.describe "Saving #to_xml with xml namespaces" do
       XML
     end
   end
+
+  context "with namespaced object with scalar child elements without namespace" do
+    let(:klass) do
+      Class.new do
+        include HappyMapper
+
+        register_namespace "prefix", "http://www.unicornland.com/prefix"
+        namespace :prefix
+        tag :foo
+        has_one :bar, String, namespace: nil
+      end
+    end
+
+    it "renders the child elements without namespace" do
+      obj = klass.new
+      obj.bar = "foobar"
+
+      expect(obj.to_xml).to eq <<~XML
+        <?xml version="1.0"?>
+        <prefix:foo xmlns:prefix="http://www.unicornland.com/prefix">
+          <bar>foobar</bar>
+        </prefix:foo>
+      XML
+    end
+
+    it "renders xml that can be parsed by the same class" do
+      obj = klass.new
+      obj.bar = "foobar"
+      copy = klass.parse(obj.to_xml)
+      expect(copy.bar).to eq obj.bar
+    end
+  end
 end

@@ -283,21 +283,19 @@ module HappyMapper
       elsif !item.nil? || element.options[:state_when_nil]
 
         item_namespace =
-          element.namespace ||
-          self.class.namespace ||
-          default_namespace
+          if element.explicit_namespace?
+            element.namespace
+          else
+            self.class.namespace || default_namespace
+          end
 
         #
         # When a value exists or the tag should always be emitted,
         # we should append the value for the tag
         #
-        if item_namespace
-          xml.send(:"#{tag}_", item.to_s) do |child_xml|
-            child_xml.parent.namespace =
-              xml.doc.root.namespace_definitions.find { |x| x.prefix == item_namespace }
-          end
-        else
-          xml.send(:"#{tag}_", item.to_s)
+        xml.send(:"#{tag}_", item.to_s) do |child_xml|
+          child_xml.parent.namespace =
+            xml.doc.root.namespace_definitions.find { |x| x.prefix == item_namespace }
         end
       end
     end

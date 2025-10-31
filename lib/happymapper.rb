@@ -78,23 +78,66 @@ module HappyMapper
       builder = Nokogiri::XML::Builder.new
     end
 
+    namespace_override ||= false
+    build_xml(builder, default_namespace, namespace_override: namespace_override,
+                                          tag_from_parent: tag_from_parent)
+
+    write_out_to_xml ? builder.to_xml.force_encoding("UTF-8") : builder
+  end
+
+  # Parse the xml and update this instance. This does not update instances
+  # of HappyMappers that are children of this object.  New instances will be
+  # created for any HappyMapper children of this object.
+  #
+  # Params and return are the same as the class parse() method above.
+  def parse(xml, options = {})
+    self.class.parse(xml, options.merge!(update: self))
+  end
+
+  # Factory for creating anonmyous HappyMappers
+  class AnonymousWrapperClassFactory
+    def self.get(name, &blk)
+      Class.new do
+        include HappyMapper
+
+        tag name
+        instance_eval(&blk)
+      end
+    end
+  end
+
+  protected
+
+  #
+  # Recursively build xml for this object. Uses the class' defined tag unless
+  # overridden with tag_from_parent. As namespace, it uses ordered by precendence:
+  # namespace_override, the class' defined namespace, or default_namespace.
+  #
+  # @param [Nokogiri::XML::Builder] builder The XML builder which is being
+  #     used.
+  # @param [String] default_namespace The name of the namespace which is the
+  #     default for the xml being produced; this is the namespace of the
+  #     parent
+  # @param [String, nil, false] namespace_override The namespace specified with the element
+  #     declaration in the parent. Overrides the namespace declaration in the
+  #     element class itself. Use nil to force no namespace to be produced. Use
+  #     false to fall back to other namespace definitions. Default is false.
+  # @param [String] tag_from_parent The xml tag to use on the element when being
+  #     called recursively. This lets the parent doc define its own structure.
+  #     Otherwise the element uses the tag it has defined for itself. Should only
+  #     apply when calling a child HappyMapper element.
+  #
+  def build_xml(builder, default_namespace, namespace_override: false, tag_from_parent: nil)
     attributes = collect_writable_attributes
 
-    #
-    # If the object we are serializing has a namespace declaration we will want
-    # to use that namespace or we will use the default namespace.
-    # When neither are specifed we are simply using whatever is default to the
-    # builder
-    #
-    namespace_name = namespace_override || self.class.namespace || default_namespace
-
-    #
-    # Create a tag in the builder that matches the class's tag name unless a tag was passed
-    # in a recursive call from the parent doc.  Then append
-    # any attributes to the element that were defined above.
-    #
+    namespace_name = if namespace_override == false
+                       self.class.namespace || default_namespace
+                     else
+                       namespace_override
+                     end
 
     tag_name = tag_from_parent || self.class.tag_name
+
     builder.send(:"#{tag_name}_", attributes) do |xml|
       register_namespaces_with_builder(builder)
 
@@ -118,29 +161,6 @@ module HappyMapper
       #
       self.class.elements.each do |element|
         element_to_xml(element, xml, default_namespace)
-      end
-    end
-
-    write_out_to_xml ? builder.to_xml.force_encoding("UTF-8") : builder
-  end
-
-  # Parse the xml and update this instance. This does not update instances
-  # of HappyMappers that are children of this object.  New instances will be
-  # created for any HappyMapper children of this object.
-  #
-  # Params and return are the same as the class parse() method above.
-  def parse(xml, options = {})
-    self.class.parse(xml, options.merge!(update: self))
-  end
-
-  # Factory for creating anonmyous HappyMappers
-  class AnonymousWrapperClassFactory
-    def self.get(name, &blk)
-      Class.new do
-        include HappyMapper
-
-        tag name
-        instance_eval(&blk)
       end
     end
   end
@@ -228,9 +248,14 @@ module HappyMapper
 
     values.each do |item|
       if item.is_a?(HappyMapper)
-        item.to_xml(xml, self.class.namespace || default_namespace,
-                    element.namespace,
-                    element.options[:tag] || nil)
+        namespace_override = if element.explicit_namespace?
+                               element.namespace
+                             else
+                               false
+                             end
+        item.build_xml(xml, self.class.namespace || default_namespace,
+                       namespace_override: namespace_override,
+                       tag_from_parent: element.options[:tag])
 
       elsif !item.nil? || element.options[:state_when_nil]
 

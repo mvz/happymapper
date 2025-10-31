@@ -305,11 +305,11 @@ module HappyMapper
       # if a namespace has been provided then set the current namespace to it
       # or use the namespace provided by the class
       # or use the 'xmlns' namespace if defined
-
-      namespace =
-        options[:namespace] ||
-        self.namespace ||
-        namespaces.key?("xmlns") && "xmlns"
+      namespace = if options.key? :namespace
+                    options[:namespace]
+                  else
+                    self.namespace || namespaces.key?("xmlns") && "xmlns"
+                  end
 
       # from the options grab any nodes present and if none are present then
       # perform the following to find the nodes for the given class

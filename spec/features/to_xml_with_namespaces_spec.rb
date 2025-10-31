@@ -425,4 +425,131 @@ RSpec.describe "Saving #to_xml with xml namespaces" do
       expect(copy.bar).to eq obj.bar
     end
   end
+
+  context "with namespaced object with mapped child elements without namespace" do
+    before do
+      stub_const "Drink", Class.new {
+        include HappyMapper
+
+        attribute :name, String
+      }
+
+      stub_const "CoffeeMachine", Class.new {
+        include HappyMapper
+
+        register_namespace "coffee", "http://coffee.org/Coffee/0.1"
+        register_namespace "beverage", "http://beverages.org/Beverage/0.1"
+        namespace :beverage
+
+        element :drink, "Drink", namespace: nil
+      }
+    end
+
+    it "uses the element declaration namespace on the element" do
+      machine = CoffeeMachine.new
+      machine.drink = Drink.new.tap { |obj| obj.name = "coffee" }
+
+      expected_xml = <<~XML
+        <?xml version="1.0"?>
+        <beverage:coffeemachine xmlns:beverage="http://beverages.org/Beverage/0.1" xmlns:coffee="http://coffee.org/Coffee/0.1">
+          <drink name="coffee"/>
+        </beverage:coffeemachine>
+      XML
+
+      expect(machine.to_xml).to eq(expected_xml)
+    end
+
+    it "renders xml that can be parsed by the same class" do
+      machine = CoffeeMachine.new
+      machine.drink = Drink.new.tap { |obj| obj.name = "coffee" }
+      copy = CoffeeMachine.parse(machine.to_xml)
+      expect(copy.drink.name).to eq machine.drink.name
+    end
+  end
+
+  context "with nil namespace overriding both parent and child class namespaces" do
+    before do
+      stub_const "Drink", Class.new {
+        include HappyMapper
+
+        namespace :beverage
+
+        attribute :name, String
+      }
+
+      stub_const "CoffeeMachine", Class.new {
+        include HappyMapper
+
+        register_namespace "beverage", "http://beverages.org/Beverage/0.1"
+        register_namespace "coffee", "http://coffee.org/Coffee/0.1"
+        namespace :coffee
+
+        element :drink, "Drink", namespace: nil
+      }
+    end
+
+    it "renders no namespace prefix on the child element" do
+      machine = CoffeeMachine.new
+      machine.drink = Drink.new.tap { |obj| obj.name = "coffee" }
+
+      expected_xml = <<~XML
+        <?xml version="1.0"?>
+        <coffee:coffeemachine xmlns:beverage="http://beverages.org/Beverage/0.1" xmlns:coffee="http://coffee.org/Coffee/0.1">
+          <drink name="coffee"/>
+        </coffee:coffeemachine>
+      XML
+
+      expect(machine.to_xml).to eq(expected_xml)
+    end
+
+    it "renders xml that can be parsed by the same class" do
+      machine = CoffeeMachine.new
+      machine.drink = Drink.new.tap { |obj| obj.name = "coffee" }
+      copy = CoffeeMachine.parse(machine.to_xml)
+      expect(copy.drink.name).to eq machine.drink.name
+    end
+  end
+
+  context "with parent and child having different namespaces" do
+    before do
+      stub_const "Drink", Class.new {
+        include HappyMapper
+
+        namespace :beverage
+
+        attribute :name, String
+      }
+
+      stub_const "CoffeeMachine", Class.new {
+        include HappyMapper
+
+        register_namespace "beverage", "http://beverages.org/Beverage/0.1"
+        register_namespace "coffee", "http://coffee.org/Coffee/0.1"
+        namespace :coffee
+
+        element :drink, "Drink"
+      }
+    end
+
+    it "uses the element declaration namespace on the element" do
+      machine = CoffeeMachine.new
+      machine.drink = Drink.new.tap { |obj| obj.name = "coffee" }
+
+      expected_xml = <<~XML
+        <?xml version="1.0"?>
+        <coffee:coffeemachine xmlns:beverage="http://beverages.org/Beverage/0.1" xmlns:coffee="http://coffee.org/Coffee/0.1">
+          <beverage:drink name="coffee"/>
+        </coffee:coffeemachine>
+      XML
+
+      expect(machine.to_xml).to eq(expected_xml)
+    end
+
+    it "renders xml that can be parsed by the same class" do
+      machine = CoffeeMachine.new
+      machine.drink = Drink.new.tap { |obj| obj.name = "coffee" }
+      copy = CoffeeMachine.parse(machine.to_xml)
+      expect(copy.drink.name).to eq machine.drink.name
+    end
+  end
 end

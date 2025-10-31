@@ -3,12 +3,7 @@
 module HappyMapper
   class Element < Item
     def find(node, namespace, xpath_options)
-      if self.namespace
-        # from the class definition
-        namespace = self.namespace
-      elsif options[:namespace]
-        namespace = options[:namespace]
-      end
+      namespace = self.namespace if self.namespace
 
       if options[:single]
         result = if options[:xpath]

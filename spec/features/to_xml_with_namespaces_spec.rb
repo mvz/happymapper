@@ -299,4 +299,36 @@ RSpec.describe "Saving #to_xml with xml namespaces" do
       XML
     end
   end
+
+  context "with namespace set on the root object using a symbol" do
+    let(:klass) do
+      Class.new do
+        include HappyMapper
+
+        register_namespace "prefix", "http://www.unicornland.com/prefix"
+        namespace :prefix
+        tag :foo
+        has_one :bar, String
+      end
+    end
+
+    it "renders xml that can be parsed by the same class" do
+      obj = klass.new
+      obj.bar = "foobar"
+      copy = klass.parse(obj.to_xml)
+      expect(copy.bar).to eq obj.bar
+    end
+
+    it "renders the namespace prefix on all elements" do
+      obj = klass.new
+      obj.bar = "foobar"
+
+      expect(obj.to_xml).to eq <<~XML
+        <?xml version="1.0"?>
+        <prefix:foo xmlns:prefix="http://www.unicornland.com/prefix">
+          <prefix:bar>foobar</prefix:bar>
+        </prefix:foo>
+      XML
+    end
+  end
 end

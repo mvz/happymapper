@@ -34,7 +34,7 @@ module HappyMapper
     # @param [Hash] xpath_options additional xpath options
     #
     def from_xml_node(node, namespace, xpath_options)
-      namespace = self.namespace if options.key?(:namespace)
+      namespace = self.namespace if explicit_namespace?
 
       if custom_parser_defined?
         find(node, namespace, xpath_options) { |n| process_node_with_custom_parser(n) }
@@ -71,6 +71,10 @@ module HappyMapper
     #
     def typecast(value)
       typecaster(value).apply(value)
+    end
+
+    def explicit_namespace?
+      options.key? :namespace
     end
 
     private

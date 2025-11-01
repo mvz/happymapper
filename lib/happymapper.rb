@@ -73,35 +73,71 @@ module HappyMapper
   #
   def to_xml(builder = nil, default_namespace = nil, namespace_override = nil,
              tag_from_parent = nil)
-    #
-    # If to_xml has been called without a passed in builder instance that
-    # means we are going to return xml output. When it has been called with
-
-    # a builder instance that means we most likely being called recursively
-    # and will return the end product as a builder instance.
-    #
     unless builder
       write_out_to_xml = true
       builder = Nokogiri::XML::Builder.new
     end
 
+    namespace_override ||= false
+    build_xml(builder, default_namespace, namespace_override: namespace_override,
+                                          tag_from_parent: tag_from_parent)
+
+    write_out_to_xml ? builder.to_xml.force_encoding("UTF-8") : builder
+  end
+
+  # Parse the xml and update this instance. This does not update instances
+  # of HappyMappers that are children of this object.  New instances will be
+  # created for any HappyMapper children of this object.
+  #
+  # Params and return are the same as the class parse() method above.
+  def parse(xml, options = {})
+    self.class.parse(xml, options.merge!(update: self))
+  end
+
+  # Factory for creating anonmyous HappyMappers
+  class AnonymousWrapperClassFactory
+    def self.get(name, &blk)
+      Class.new do
+        include HappyMapper
+
+        tag name
+        instance_eval(&blk)
+      end
+    end
+  end
+
+  protected
+
+  #
+  # Recursively build xml for this object. Uses the class' defined tag unless
+  # overridden with tag_from_parent. As namespace, it uses ordered by precendence:
+  # namespace_override, the class' defined namespace, or default_namespace.
+  #
+  # @param [Nokogiri::XML::Builder] builder The XML builder which is being
+  #     used.
+  # @param [String] default_namespace The name of the namespace which is the
+  #     default for the xml being produced; this is the namespace of the
+  #     parent
+  # @param [String, nil, false] namespace_override The namespace specified with the element
+  #     declaration in the parent. Overrides the namespace declaration in the
+  #     element class itself. Use nil to force no namespace to be produced. Use
+  #     false to fall back to other namespace definitions. Default is false.
+  # @param [String] tag_from_parent The xml tag to use on the element when being
+  #     called recursively. This lets the parent doc define its own structure.
+  #     Otherwise the element uses the tag it has defined for itself. Should only
+  #     apply when calling a child HappyMapper element.
+  #
+  def build_xml(builder, default_namespace, namespace_override: false, tag_from_parent: nil)
     attributes = collect_writable_attributes
 
-    #
-    # If the object we are serializing has a namespace declaration we will want
-    # to use that namespace or we will use the default namespace.
-    # When neither are specifed we are simply using whatever is default to the
-    # builder
-    #
-    namespace_name = namespace_override || self.class.namespace || default_namespace
-
-    #
-    # Create a tag in the builder that matches the class's tag name unless a tag was passed
-    # in a recursive call from the parent doc.  Then append
-    # any attributes to the element that were defined above.
-    #
+    namespace_name = if namespace_override == false
+                       self.class.namespace || default_namespace
+                     else
+                       namespace_override
+                     end
 
     tag_name = tag_from_parent || self.class.tag_name
+
     builder.send(:"#{tag_name}_", attributes) do |xml|
       register_namespaces_with_builder(builder)
 
@@ -127,35 +163,6 @@ module HappyMapper
         element_to_xml(element, xml, default_namespace)
       end
     end
-
-    # Write out to XML, this value was set above, based on whether or not an XML
-    # builder object was passed to it as a parameter. When there was no parameter
-    # we assume we are at the root level of the #to_xml call and want the actual
-    # xml generated from the object. If an XML builder instance was specified
-    # then we assume that has been called recursively to generate a larger
-    # XML document.
-    write_out_to_xml ? builder.to_xml.force_encoding("UTF-8") : builder
-  end
-
-  # Parse the xml and update this instance. This does not update instances
-  # of HappyMappers that are children of this object.  New instances will be
-  # created for any HappyMapper children of this object.
-  #
-  # Params and return are the same as the class parse() method above.
-  def parse(xml, options = {})
-    self.class.parse(xml, options.merge!(update: self))
-  end
-
-  # Factory for creating anonmyous HappyMappers
-  class AnonymousWrapperClassFactory
-    def self.get(name, &blk)
-      Class.new do
-        include HappyMapper
-
-        tag name
-        instance_eval(&blk)
-      end
-    end
   end
 
   private
@@ -178,33 +185,17 @@ module HappyMapper
   end
 
   #
-  # Find the attributes for the class and collect them into a Hash structure
+  # Find the attributes for the class and collect them into a Hash structure.
+  # Skips attributes marked as read_only. Attributes with nil value are ignored
+  # unless they explicitly state that they should be expressed in the output.
   #
   def collect_writable_attributes
-    #
-    # Find the attributes for the class and collect them into an array
-    # that will be placed into a Hash structure
-    #
     attributes = self.class.attributes.filter_map do |attribute|
-      #
-      # If an attribute is marked as read_only then we want to ignore the attribute
-      # when it comes to saving the xml document; so we will not go into any of
-      # the below process
-      #
       next if attribute.options[:read_only]
 
       value = send(attribute.method_name)
       value = nil if value == attribute.default
-
-      #
-      # Apply any on_save lambda/proc or value defined on the attribute.
-      #
       value = apply_on_save_action(attribute, value)
-
-      #
-      # Attributes that have a nil value should be ignored unless they explicitly
-      # state that they should be expressed in the output.
-      #
       next if value.nil? && !attribute.options[:state_when_nil]
 
       attribute_namespace = attribute.namespace
@@ -236,32 +227,19 @@ module HappyMapper
     end
   end
 
-  # Persist a single nested element as xml
+  #
+  # For a single nested element, persist, as xml, the value found by calling
+  # the method corresponding to the element's name. Skips elements marked as
+  # read-only. Handles both single and array-like values.
+  #
   def element_to_xml(element, xml, default_namespace)
-    #
-    # If an element is marked as read only do not consider at all when
-    # saving to XML.
-    #
     return if element.options[:read_only]
 
     tag = element.tag || element.name
 
-    #
-    # The value to store is the result of the method call to the element,
-    # by default this is simply utilizing the attr_accessor defined. However,
-    # this allows for this method to be overridden
-    #
     value = send(element.name)
-
-    #
-    # Apply any on_save action defined on the element.
-    #
     value = apply_on_save_action(element, value)
 
-    #
-    # To allow for us to treat both groups of items and singular items
-    # equally we wrap the value and treat it as an array.
-    #
     values = if value.respond_to?(:to_ary) && !element.options[:single]
                value.to_ary
              else
@@ -270,34 +248,27 @@ module HappyMapper
 
     values.each do |item|
       if item.is_a?(HappyMapper)
-
-        #
-        # Other items are convertable to xml through the xml builder
-        # process should have their contents retrieved and attached
-        # to the builder structure
-        #
-        item.to_xml(xml, self.class.namespace || default_namespace,
-                    element.namespace,
-                    element.options[:tag] || nil)
+        namespace_override = if element.explicit_namespace?
+                               element.namespace
+                             else
+                               false
+                             end
+        item.build_xml(xml, self.class.namespace || default_namespace,
+                       namespace_override: namespace_override,
+                       tag_from_parent: element.options[:tag])
 
       elsif !item.nil? || element.options[:state_when_nil]
 
         item_namespace =
-          element.namespace ||
-          self.class.namespace ||
-          default_namespace
-
-        #
-        # When a value exists or the tag should always be emitted,
-        # we should append the value for the tag
-        #
-        if item_namespace
-          xml.send(:"#{tag}_", item.to_s) do |child_xml|
-            child_xml.parent.namespace =
-              xml.doc.root.namespace_definitions.find { |x| x.prefix == item_namespace }
+          if element.explicit_namespace?
+            element.namespace
+          else
+            self.class.namespace || default_namespace
           end
-        else
-          xml.send(:"#{tag}_", item.to_s)
+
+        xml.send(:"#{tag}_", item.to_s) do |child_xml|
+          child_xml.parent.namespace =
+            xml.doc.root.namespace_definitions.find { |x| x.prefix == item_namespace }
         end
       end
     end

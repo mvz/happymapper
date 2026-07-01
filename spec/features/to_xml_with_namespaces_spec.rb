@@ -229,7 +229,7 @@ RSpec.describe "Saving #to_xml with xml namespaces" do
     it "writes the default namespace to xml without repeating xmlns" do
       recipe = Recipe.new
       recipe.ingredients = ["One Cup Flour", "Two Scoops of Lovin"]
-      expect(recipe.to_xml).to match(/ xmlns="urn:eventis:prodis:onlineapi:1\.0"/)
+      expect(recipe.to_xml).to include(' xmlns="urn:eventis:prodis:onlineapi:1.0"')
     end
   end
 

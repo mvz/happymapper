@@ -31,13 +31,4 @@ Gem::Specification.new do |spec|
   spec.extra_rdoc_files = ["README.md", "CHANGELOG.md", "License"]
 
   spec.add_dependency "nokogiri", "~> 1.5"
-
-  spec.add_development_dependency "rake", "~> 13.0"
-  spec.add_development_dependency "rake-manifest", "~> 0.2.0"
-  spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "rubocop", "~> 1.80"
-  spec.add_development_dependency "rubocop-packaging", "~> 0.6.0"
-  spec.add_development_dependency "rubocop-performance", "~> 1.25"
-  spec.add_development_dependency "rubocop-rspec", "~> 3.7"
-  spec.add_development_dependency "simplecov", "~> 0.22.0"
 end

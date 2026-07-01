@@ -13,10 +13,6 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 3.0
 
-# Put development dependencies in the gemspec so rubygems.org knows about them
-Gemspec/DevelopmentDependencies:
-  EnforcedStyle: gemspec
-
 # Spaces in strings with line continuations go at the beginning of the line.
 Layout/LineContinuationLeadingSpace:
   EnforcedStyle: leading

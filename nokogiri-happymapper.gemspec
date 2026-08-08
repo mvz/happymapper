@@ -14,15 +14,17 @@ Gem::Specification.new do |spec|
     "Franklin Webber",
     "Matijs van Zuijlen"
   ]
-  spec.email = "matijs@matijs.net"
+  spec.email = ["matijs@matijs.net"]
 
   spec.summary = "Provides a simple way to map XML to Ruby Objects and back again."
   spec.description = "Object to XML Mapping Library, using Nokogiri" \
                      " (fork from John Nunemaker's Happymapper)"
   spec.homepage = "http://github.com/mvz/happymapper"
-  spec.license = "MIT"
-  spec.required_ruby_version = ">= 3.0.0"
 
+  spec.license = "MIT"
+  spec.required_ruby_version = ">= 3.2.0"
+
+  spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["rubygems_mfa_required"] = "true"
 
   spec.files = File.read("Manifest.txt").split

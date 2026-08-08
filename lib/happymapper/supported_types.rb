@@ -47,8 +47,8 @@ module HappyMapper
     #       DateTime.parse(value,to_s)
     #     end
     #
-    def register_type(type, &block)
-      register CastWhenType.new(type, &block)
+    def register_type(type, &)
+      register CastWhenType.new(type, &)
     end
 
     #

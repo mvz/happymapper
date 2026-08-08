@@ -11,7 +11,7 @@ plugins:
 
 AllCops:
   NewCops: enable
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 3.2
 
 # Spaces in strings with line continuations go at the beginning of the line.
 Layout/LineContinuationLeadingSpace:

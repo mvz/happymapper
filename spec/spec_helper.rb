@@ -2,9 +2,8 @@
 
 require "simplecov"
 SimpleCov.start do
-  track_files "lib/**/*.rb"
-  add_filter "/spec/"
-  add_filter "lib/happymapper/version.rb"
+  cover "lib/**/*.rb"
+  skip "lib/happymapper/version.rb"
   enable_coverage :branch
 end
 
